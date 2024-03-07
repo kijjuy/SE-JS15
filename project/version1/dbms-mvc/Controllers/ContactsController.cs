@@ -61,27 +61,6 @@ namespace dbms_mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-               // Contact newContact = new Contact {
-               //     ContactId = viewModel.ContactId,
-               //     FirstName = viewModel.FirstName,
-               //     LastName = viewModel.LastName,
-               //     Organization = viewModel.Organization,
-               //     Title = viewModel.Title,
-               //     StreetAddress1 = viewModel.StreetAddress1,
-               //     City = viewModel.City,
-               //     Province = viewModel.Province,
-               //     PostalCode = viewModel.PostalCode,
-               //     Subscribed = viewModel.Subscribed,
-               //     Email = viewModel.Email,
-               //     Phone = viewModel.Phone,
-               //     Fax = viewModel.Fax,
-               //     Website = viewModel.Website,
-               //     BedsCount = viewModel.BedsCount,
-               //     Address2 = viewModel.Address2,
-               //     Extension = viewModel.Extension,
-               //     MailingList = await _context.mailingLists.FirstOrDefaultAsync(
-               //             m => m.MailingListId == viewModel.MailingListId)
-               // };
                 _context.Add(contact);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
