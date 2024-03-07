@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
+using dbms_mvc.Models;
 
 namespace dbms_mvc.Controllers
 {
@@ -150,6 +146,19 @@ namespace dbms_mvc.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Upload() {
+            return View();
+        }
+
+
+        [HttpPost, ActionName("Upload")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            Console.WriteLine("File size: " + file.Length);
+            return View(file);
         }
 
         private bool ContactExists(int id)
