@@ -43,9 +43,13 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            List<MailingList> mailingLists = await _context.mailingLists.ToListAsync();
+            ContactsViewModel viewModel = new ContactsViewModel {
+                   MailingLists = mailingLists
+            };
+            return View(viewModel);
         }
 
         // POST: Contacts/Create
@@ -53,15 +57,36 @@ namespace dbms_mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ContactId,FirstName,LastName,Organization,Title,StreetAddress1,City,Province,PostalCode,Subscribed,Email,Phone,Fax,Website,BedsCount,Address2,Extension")] Contact contact)
+        public async Task<IActionResult> Create([Bind("ContactId,FirstName,LastName,Organization,Title,StreetAddress1,City,Province,PostalCode,Subscribed,Email,Phone,Fax,Website,BedsCount,Address2,Extension,MailingList")] Contact contact)
         {
             if (ModelState.IsValid)
             {
+               // Contact newContact = new Contact {
+               //     ContactId = viewModel.ContactId,
+               //     FirstName = viewModel.FirstName,
+               //     LastName = viewModel.LastName,
+               //     Organization = viewModel.Organization,
+               //     Title = viewModel.Title,
+               //     StreetAddress1 = viewModel.StreetAddress1,
+               //     City = viewModel.City,
+               //     Province = viewModel.Province,
+               //     PostalCode = viewModel.PostalCode,
+               //     Subscribed = viewModel.Subscribed,
+               //     Email = viewModel.Email,
+               //     Phone = viewModel.Phone,
+               //     Fax = viewModel.Fax,
+               //     Website = viewModel.Website,
+               //     BedsCount = viewModel.BedsCount,
+               //     Address2 = viewModel.Address2,
+               //     Extension = viewModel.Extension,
+               //     MailingList = await _context.mailingLists.FirstOrDefaultAsync(
+               //             m => m.MailingListId == viewModel.MailingListId)
+               // };
                 _context.Add(contact);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(contact);
+            return View();
         }
 
         // GET: Contacts/Edit/5

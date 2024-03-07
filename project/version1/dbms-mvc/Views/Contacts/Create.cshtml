@@ -1,4 +1,4 @@
-@model Contact
+@model ContactsViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -91,6 +91,11 @@
                 <label asp-for="Extension" class="control-label"></label>
                 <input asp-for="Extension" class="form-control" />
                 <span asp-validation-for="Extension" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MailingList" class="control-label"></label>
+                <input asp-for="MailingList" class="form-control" />
+                <span asp-validation-for="MailingList" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
