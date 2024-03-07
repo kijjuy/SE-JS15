@@ -170,24 +170,22 @@ namespace dbms_mvc.Controllers
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
                     reader.Read();
-                    Dictionary<string, List<string>>[] rows = new Dictionary<string, List<string>>[reader.FieldCount];
+                    (string, List<string>)[] rows = new (string, List<string>)[reader.FieldCount];
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
                         Console.WriteLine("data: " + reader.GetValue(i));
                         string key = reader.GetValue(i).ToString();
                         List<string> list = new List<string>();
-                        rows[i] = new Dictionary<string, List<string>>();
-                        rows[i].Add(key, list);
+                        rows[i] = new (key, list);
                     }
-                    foreach (var dict in rows)
-                    {
-                        Console.WriteLine(dict.FirstOrDefault());
+                    foreach(var tup in rows) {
+                        Console.WriteLine(tup.ToString());
                     }
                     //while (reader.Read())
                     //{
-                    //    Console.WriteLine("Row count: " + reader.FieldCount);
                     //    for (int i = 0; i < reader.FieldCount; i++)
                     //    {
+                    //        rows[i].
                     //        Console.WriteLine("data: " + reader.GetValue(i));
                     //    }
                     //}
