@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
-using dbms_mvc.Models;
+using ExcelDataReader;
 
 namespace dbms_mvc.Controllers
 {
@@ -42,8 +42,9 @@ namespace dbms_mvc.Controllers
         public async Task<IActionResult> Create()
         {
             List<MailingList> mailingLists = await _context.mailingLists.ToListAsync();
-            ContactsViewModel viewModel = new ContactsViewModel {
-                   MailingLists = mailingLists
+            ContactsViewModel viewModel = new ContactsViewModel
+            {
+                MailingLists = mailingLists
             };
             return View(viewModel);
         }
@@ -148,7 +149,8 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Upload() {
+        public async Task<IActionResult> Upload()
+        {
             return View();
         }
 
@@ -157,8 +159,40 @@ namespace dbms_mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            Console.WriteLine("File size: " + file.Length);
+            GetFormData(file);
             return View(file);
+        }
+
+        private void GetFormData(IFormFile file)
+        {
+            using (var stream = file.OpenReadStream())
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    reader.Read();
+                    Dictionary<string, List<string>>[] rows = new Dictionary<string, List<string>>[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        Console.WriteLine("data: " + reader.GetValue(i));
+                        string key = reader.GetValue(i).ToString();
+                        List<string> list = new List<string>();
+                        rows[i] = new Dictionary<string, List<string>>();
+                        rows[i].Add(key, list);
+                    }
+                    foreach (var dict in rows)
+                    {
+                        Console.WriteLine(dict.FirstOrDefault());
+                    }
+                    //while (reader.Read())
+                    //{
+                    //    Console.WriteLine("Row count: " + reader.FieldCount);
+                    //    for (int i = 0; i < reader.FieldCount; i++)
+                    //    {
+                    //        Console.WriteLine("data: " + reader.GetValue(i));
+                    //    }
+                    //}
+                }
+            }
         }
 
         private bool ContactExists(int id)

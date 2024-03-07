@@ -24,6 +24,8 @@ public class Program
 
         builder.Services.AddControllersWithViews();
 
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
