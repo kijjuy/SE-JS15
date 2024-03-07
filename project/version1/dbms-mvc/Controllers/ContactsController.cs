@@ -173,23 +173,90 @@ namespace dbms_mvc.Controllers
                     (string, List<string>)[] rows = new (string, List<string>)[reader.FieldCount];
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        Console.WriteLine("data: " + reader.GetValue(i));
                         string key = reader.GetValue(i).ToString();
                         List<string> list = new List<string>();
-                        rows[i] = new (key, list);
+                        rows[i] = new(key, list);
                     }
-                    foreach(var tup in rows) {
-                        Console.WriteLine(tup.ToString());
+                    while (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            string val;
+                            try
+                            {
+                                val = reader.GetValue(i).ToString();
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                                val = "";
+                            }
+                            rows[i].Item2.Add(val);
+                        }
                     }
-                    //while (reader.Read())
-                    //{
-                    //    for (int i = 0; i < reader.FieldCount; i++)
-                    //    {
-                    //        rows[i].
-                    //        Console.WriteLine("data: " + reader.GetValue(i));
-                    //    }
-                    //}
+                    foreach (var row in rows)
+                    {
+
+                    }
                 }
+            }
+        }
+
+        private void CreateContact(string key, string val)
+        {
+            Contact contact = new Contact();
+            switch(key) {
+                case "Organization":
+                    contact.Organization = val;
+                    break;
+                case "First":
+                    contact.FirstName = val;
+                    break;
+                case "Name":
+                    contact.LastName = val;
+                    break;
+                case "Title":
+                    contact.Title = val;
+                    break;
+                case "Address":
+                    contact.StreetAddress1 = val;
+                    break;
+                case "Address 2":
+                    contact.Address2 = val;
+                    break;
+                case "City":
+                    contact.City = val;
+                    break;
+                case "Province":
+                    contact.Province = val;
+                    break;
+                case "Postal Code":
+                    contact.PostalCode = val;
+                    break;
+                case "Phone":
+                    contact.Phone = val;
+                    break;
+                case "Fax":
+                    contact.Fax = val;
+                    break;
+                case "Website":
+                    contact.Website = val;
+                    break;
+                case "Home Category":
+                    contact.HomeCategory = val;
+                    break;
+                case "Mailing List":
+                    contact.MailingList = val;
+                    break;
+                case "Number of Beds":
+                    contact.BedsCount = int.Parse(val);
+                    break;
+                case "Subscribed Y/N":
+                    contact.Subscribed = val;
+                    break;
+                case "Emails":
+                    contact.Email = val;
+                    break;
             }
         }
 
