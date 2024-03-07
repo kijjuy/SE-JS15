@@ -80,5 +80,5 @@ public class Contact
     public string? Extension { get; set; }
 
     [Required]
-    public MailingList MailingList { get; set; }
+    public string MailingList { get; set; }
 }

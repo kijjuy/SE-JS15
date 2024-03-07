@@ -22,8 +22,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Contact>().HasKey(c => c.ContactId);
         builder.Entity<MailingList>().HasKey(m => m.MailingListId);
 
-        builder.Entity<Contact>()
-            .HasOne(c => c.MailingList);
+        //builder.Entity<Contact>()
+        //    .HasOne(c => c.MailingList);
     }
 
 }
