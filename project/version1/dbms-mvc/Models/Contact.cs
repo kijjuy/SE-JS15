@@ -55,7 +55,8 @@ public class Contact
     public string PostalCode { get; set; }
 
     [Required]
-    public char Subscribed { get; set; }
+    [StringLength(1)]
+    public string Subscribed { get; set; }
 
     [Required]
     [StringLength(50)]
@@ -64,6 +65,8 @@ public class Contact
     [Required]
     [StringLength(11)]
     public string Phone { get; set; }
+
+    public string? HomeCategory { get; set; }
 
     [StringLength(11)]
     public string? Fax { get; set; }

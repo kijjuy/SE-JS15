@@ -258,6 +258,7 @@ namespace dbms_mvc.Controllers
                     contact.Email = val;
                     break;
             }
+            Console.WriteLine(contact);
         }
 
         private bool ContactExists(int id)
