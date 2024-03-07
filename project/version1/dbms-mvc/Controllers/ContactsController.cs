@@ -194,18 +194,27 @@ namespace dbms_mvc.Controllers
                             rows[i].Item2.Add(val);
                         }
                     }
-                    foreach (var row in rows)
+                    for (int i = 1; i < rows[0].Item2.Count(); i++)
                     {
-
+                        Contact contact = new Contact();
+                        foreach (var row in rows)
+                        {
+                            string key = row.Item1;
+                            string val = row.Item2[i];
+                            UpdateContact(key, val, contact);
+                        }
+                        Console.WriteLine(contact);
+                        _context.contacts.Add(contact);
+                        _context.SaveChanges();
                     }
                 }
             }
         }
 
-        private void CreateContact(string key, string val)
+        private void UpdateContact(string key, string val, Contact contact)
         {
-            Contact contact = new Contact();
-            switch(key) {
+            switch (key)
+            {
                 case "Organization":
                     contact.Organization = val;
                     break;
@@ -249,7 +258,12 @@ namespace dbms_mvc.Controllers
                     contact.MailingList = val;
                     break;
                 case "Number of Beds":
-                    contact.BedsCount = int.Parse(val);
+                    try
+                    {
+                        contact.BedsCount = int.Parse(val);
+                    } catch (Exception e) {
+                        Console.WriteLine("Bedcount not set");
+                    }
                     break;
                 case "Subscribed Y/N":
                     contact.Subscribed = val;
@@ -258,7 +272,6 @@ namespace dbms_mvc.Controllers
                     contact.Email = val;
                     break;
             }
-            Console.WriteLine(contact);
         }
 
         private bool ContactExists(int id)
