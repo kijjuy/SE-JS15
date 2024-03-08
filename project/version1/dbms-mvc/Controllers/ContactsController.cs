@@ -177,8 +177,7 @@ namespace dbms_mvc.Controllers
                         List<string> list = new List<string>();
                         rows[i] = new(key, list);
                     }
-                    while (reader.Read())
-                    {
+                    do {
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
                             string val;
@@ -194,6 +193,7 @@ namespace dbms_mvc.Controllers
                             rows[i].Item2.Add(val);
                         }
                     }
+                    while (reader.Read());
                     for (int i = 1; i < rows[0].Item2.Count(); i++)
                     {
                         Contact contact = new Contact();
