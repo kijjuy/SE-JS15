@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
@@ -12,16 +13,35 @@ namespace dbms_mvc.Controllers
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> _userManager;
+        private RoleManager<IdentityRole> _roleManager;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
+                RoleManager<IdentityRole> roleManager)
         {
             _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            List<ApplicationUser> users = await _context.Users.ToListAsync();
+            List<AppUserViewModel> viewModels = await GenerateViewModels(users);
+            return View(viewModels);
+        }
+
+        public async Task<List<AppUserViewModel>> GenerateViewModels(List<ApplicationUser> appUsers)
+        {
+            List<AppUserViewModel> viewModels = new List<AppUserViewModel>();
+            foreach (ApplicationUser appUser in appUsers)
+            {
+                IList<string> roles = await _userManager.GetRolesAsync(appUser);
+                AppUserViewModel newViewModel = new AppUserViewModel(appUser, roles);
+                viewModels.Add(newViewModel);
+            }
+            return viewModels;
         }
 
         // GET: Users/Details/5
