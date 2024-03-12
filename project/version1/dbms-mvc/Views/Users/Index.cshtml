@@ -34,7 +34,9 @@
                 @Html.DisplayFor(modelItem => item.ApprovedDevices)
             </th>
             <th>
-                @Html.DisplayFor(modelItem => item.Roles)
+                @foreach (string role in item.Roles) {
+                    @role <br>
+                }
             </th>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
