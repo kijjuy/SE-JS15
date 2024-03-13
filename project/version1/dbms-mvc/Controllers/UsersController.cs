@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dbms_mvc.Controllers
 {
@@ -59,7 +55,17 @@ namespace dbms_mvc.Controllers
                 return NotFound();
             }
 
-            return View(applicationUser);
+            IList<string> roles = await _userManager.GetRolesAsync(applicationUser);
+            AppUserViewModel viewModel = new AppUserViewModel(applicationUser, roles);
+
+            return View(viewModel);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> AddRoleToUser(string id, string role)
+        {
+            ApplicationUser appUser = await _userManager.FindByIdAsync(id);
+            return View(appUser);
         }
 
         // GET: Users/Create
