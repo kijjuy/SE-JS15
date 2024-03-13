@@ -55,8 +55,14 @@ namespace dbms_mvc.Controllers
                 return NotFound();
             }
 
-            IList<string> roles = await _userManager.GetRolesAsync(applicationUser);
-            AppUserViewModel viewModel = new AppUserViewModel(applicationUser, roles);
+            IList<string> userRoles = await _userManager.GetRolesAsync(applicationUser);
+            IQueryable<IdentityRole> allRolesQuery = _roleManager.Roles;
+            List<string> allRolesList = new List<string>();
+            foreach (IdentityRole role in allRolesQuery)
+            {
+                allRolesList.Add(role.Name);
+            }
+            AddRoleViewModel viewModel = new AddRoleViewModel(applicationUser, userRoles, allRolesList);
 
             return View(viewModel);
         }
