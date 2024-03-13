@@ -1,7 +1,8 @@
-@model AppUserViewModel
+@model AddRoleViewModel
 
 @{
-    ViewData["Title"] = "Details";
+ViewData["Title"] = "Details";
+AppUserViewModel appUser = Model.AppUserViewModel;
 }
 
 <h1>Details</h1>
@@ -10,26 +11,86 @@
     <h4>ApplicationUser</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AppUserViewModel.Email)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AppUserViewModel.Email)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Roles)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AppUserViewModel.Roles)
         </dt>
-        <dd class = "col-sm-10">
-            @foreach(string role in Model.Roles) {
-                @role <br>
+        <dd class="col-sm-10">
+            @foreach(string role in appUser.Roles) {
+            @role <br>
             }
         </dd>
     </dl>
 </div>
 <div>
-    @if(Model.Roles.Contains("create")) {
-
+    @foreach(string role in Model.AllRoles){
+        @if(appUser.Roles.Contains(role)) {
+            <div id="@role" class="removeRoleButton btn btn-danger" >Remove role: @role</div>
+        } else {
+            <div id="@role" class="addRoleButton btn btn-primary" >Add role: @role</div>
+        }
     }
-    <a asp-action="AddUserToRole" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="AddUserToRole" asp-route-id="@appUser?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+<p>User Id: @appUser.Id</p>
+
+@section scripts {
+    <script>
+        const userId = "@appUser.Id";
+
+        const baseUrl = "/Users";
+
+        function updateButtonClass(id) {
+            const button = $(`#${id}`);
+            button.toggleClass(["btn-primary", "btn-danger"])
+            if(button.hasClass("removeRoleButton")) {
+                button.html(`Add role: ${id}`);
+            } else {
+                button.html(`Remove role: ${id}`);
+            }
+        }
+
+        function sendRequest(url, event) {
+            const buttonId = event.target.id;
+            const UserRoleData = {
+                Id: userId,
+                Role: buttonId
+            };
+
+            $.ajax({
+                type: "PUT",
+                url: url,
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(UserRoleData),
+                success: function(response) {
+                    if(response.status === "success") {
+                        updateButtonClass(buttonId);
+                    } else {
+                        alert(`error changing role. message: ${response.message}."`);
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                        alert("error sending put request.");
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            $(".removeRoleButton").click(function(event) {
+                sendRequest(baseUrl + "/RemoveRoleFromUser", event);
+            });
+
+            $(".addRoleButton").click(function(event) {
+                sendRequest(baseUrl + "/AddRoleToUser", event);
+            });
+        });
+    </script>
+}
