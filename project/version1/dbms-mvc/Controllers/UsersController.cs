@@ -68,10 +68,55 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> AddRoleToUser(string id, string role)
+        public async Task<IActionResult> AddRoleToUser([FromBody] UserRoleData roleData)
         {
+            string id = roleData.Id;
+            string role = roleData.Role;
             ApplicationUser appUser = await _userManager.FindByIdAsync(id);
-            return View(appUser);
+            if (appUser == null)
+            {
+                //todo: log error
+                var returnErrorMessage = new
+                {
+                    status = "error",
+                    message = $"Could not find user with id: {id}"
+                };
+                Console.WriteLine($"Id of user: {id}");
+                return Json(returnErrorMessage);
+            }
+            await _userManager.AddToRoleAsync(appUser, role);
+            var returnSuccessMessage = new
+            {
+                status = "success",
+                message = $"Successfully added {role} to user"
+            };
+            return Json(returnSuccessMessage);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> RemoveRoleFromUser([FromBody] UserRoleData roleData)
+        {
+            string id = roleData.Id;
+            string role = roleData.Role;
+            ApplicationUser appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null)
+            {
+                //todo: log error
+                var returnErrorMessage = new
+                {
+                    status = "error",
+                    message = $"Could not find user with id: {id}"
+                };
+                return Json(returnErrorMessage);
+            }
+            await _userManager.RemoveFromRoleAsync(appUser, role);
+            var returnSuccessMessage = new
+            {
+                status = "success",
+                message = $"Successfully removed {role} from user"
+            };
+            return Json(returnSuccessMessage);
+
         }
 
         // GET: Users/Create
