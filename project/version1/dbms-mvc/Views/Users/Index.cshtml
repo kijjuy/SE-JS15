@@ -31,7 +31,9 @@
                 @Html.DisplayFor(modelItem => item.Email)
             </th>
             <th>
-                @Html.DisplayFor(modelItem => item.ApprovedDevices)
+                @foreach (string device in item.ApprovedDevices) {
+                    @device <br>
+                }
             </th>
             <th>
                 @foreach (string role in item.Roles) {
