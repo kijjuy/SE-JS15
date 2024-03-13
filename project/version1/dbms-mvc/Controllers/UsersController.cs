@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace dbms_mvc.Controllers
 {
+    [Authorize(Roles = "admin")]
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
