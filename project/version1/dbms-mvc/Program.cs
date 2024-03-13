@@ -10,9 +10,10 @@ public class Program
     {
 
         var builder = WebApplication.CreateBuilder(args);
+        var ConfigurationManager = builder.Configuration;
 
         // Add services to the container.
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        var connectionString = ConfigurationManager.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -52,23 +53,36 @@ public class Program
             pattern: "{controller=Home}/{action=Index}/{id?}");
         app.MapRazorPages();
 
-        using (var scope = app.Services.CreateScope())
+        using(var scope = app.Services.CreateAsyncScope())
         {
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            if (!context.mailingLists.Any())
-            {
-                Console.WriteLine("Creating Mailing List item..........................");
-                MailingList ml = new MailingList {
-                    FullName = "AdvantAge",
-                    CreationDate = DateTime.Now
-                };
-                context.mailingLists.Add(ml);
-                context.SaveChanges();
-            }
-
+            Console.WriteLine("about to run role creator");
+            EnsureRolesCreated(scope.ServiceProvider);
         }
 
         app.Run();
+    }
+
+    private static void EnsureRolesCreated(IServiceProvider serviceProvider)
+    {
+        var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
+        Console.WriteLine($"Role manager: {roleManager.ToString()}");
+        string[] roleNames = new string[] {
+            "create",
+            "delete",
+            "update",
+            "admin"
+        };
+
+        foreach (string roleName in roleNames)
+        {
+            bool roleExists = roleManager.RoleExistsAsync(roleName).Result;
+            if (!roleExists)
+            {
+                Console.WriteLine($"Adding role: {roleName}");
+                IdentityRole role = new IdentityRole(roleName);
+                roleManager.CreateAsync(role);
+            }
+        }
     }
 }
 
