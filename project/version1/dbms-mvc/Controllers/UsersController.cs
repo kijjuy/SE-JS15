@@ -63,7 +63,7 @@ namespace dbms_mvc.Controllers
             {
                 allRolesList.Add(role.Name);
             }
-            AddRoleViewModel viewModel = new AddRoleViewModel(applicationUser, userRoles, allRolesList);
+            ModifyRoleViewModel viewModel = new ModifyRoleViewModel(applicationUser, userRoles, allRolesList);
 
             return View(viewModel);
         }
