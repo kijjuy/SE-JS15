@@ -30,9 +30,9 @@ AppUserViewModel appUser = Model.AppUserViewModel;
 <div>
     @foreach(string role in Model.AllRoles){
         @if(appUser.Roles.Contains(role)) {
-            <div id="@role" class="removeRoleButton btn btn-danger" >Remove role: @role</div>
+            <div id="@role" class="removeRoleButton roleButton btn btn-danger" >Remove role: @role</div>
         } else {
-            <div id="@role" class="addRoleButton btn btn-primary" >Add role: @role</div>
+            <div id="@role" class="addRoleButton roleButton btn btn-primary" >Add role: @role</div>
         }
     }
     <a asp-action="AddUserToRole" asp-route-id="@appUser?.Id">Edit</a> |
@@ -55,6 +55,7 @@ AppUserViewModel appUser = Model.AppUserViewModel;
             } else {
                 button.html(`Remove role: ${id}`);
             }
+            button.toggleClass(["removeRoleButton", "addRoleButton"])
         }
 
         function sendRequest(url, event) {
@@ -84,13 +85,12 @@ AppUserViewModel appUser = Model.AppUserViewModel;
         }
 
         $(document).ready(function() {
-            $(".removeRoleButton").click(function(event) {
-                sendRequest(baseUrl + "/RemoveRoleFromUser", event);
+            $(".roleButton").click(function(event) {
+                var button = $(`#${event.target.id}`);
+                const url = button.hasClass("addRoleButton") ? baseUrl + "/AddRoleToUser" : baseUrl + "/RemoveRoleFromUser";
+                sendRequest(url, event);
             });
 
-            $(".addRoleButton").click(function(event) {
-                sendRequest(baseUrl + "/AddRoleToUser", event);
-            });
         });
     </script>
 }
