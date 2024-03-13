@@ -1,15 +1,26 @@
-using Microsoft.AspNetCore.Identity;
-
-
 public class AppUserViewModel
 {
 
     public AppUserViewModel(ApplicationUser appUser, IList<string> roles)
     {
         this.Id = appUser.Id;
-        this.ApprovedDevices = appUser.ApprovedDeviced;
         this.Email = appUser.Email;
-        this.Roles = roles;
+        if (appUser.ApprovedDeviced != null)
+        {
+            this.ApprovedDevices = appUser.ApprovedDeviced;
+        }
+        else
+        {
+            this.ApprovedDevices = new List<string>();
+        }
+        if (roles != null)
+        {
+            this.Roles = roles;
+        }
+        else
+        {
+            this.Roles = new List<string>();
+        }
     }
 
     public string Id { get; set; }
