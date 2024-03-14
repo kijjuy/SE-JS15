@@ -167,7 +167,7 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "create, admin")]
+        [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload()
         {
             return View();
@@ -176,7 +176,7 @@ namespace dbms_mvc.Controllers
 
         [HttpPost, ActionName("Upload")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "create, admin")]
+        [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             GetFormData(file);

@@ -11,6 +11,7 @@ public static class DbInitializer
         "create",
         "update",
         "delete",
+        "upload",
     };
 
     public static async Task<int> SeedUsersAndRoles(IServiceProvider serviceProvider)
