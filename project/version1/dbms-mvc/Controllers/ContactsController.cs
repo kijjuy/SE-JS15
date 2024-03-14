@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
 using ExcelDataReader;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dbms_mvc.Controllers
 {
+    [Authorize]
     public class ContactsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -49,6 +51,7 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts/Create
+        [Authorize(Roles = "create, admin")]
         public async Task<IActionResult> Create()
         {
             List<MailingList> mailingLists = await _context.mailingLists.ToListAsync();
@@ -64,6 +67,7 @@ namespace dbms_mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "create, admin")]
         public async Task<IActionResult> Create([Bind("ContactId,FirstName,LastName,Organization,Title,StreetAddress1,City,Province,PostalCode,Subscribed,Email,Phone,Fax,Website,BedsCount,Address2,Extension,MailingList")] Contact contact)
         {
             if (ModelState.IsValid)
@@ -76,6 +80,7 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts/Edit/5
+        [Authorize(Roles = "update, admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -96,6 +101,7 @@ namespace dbms_mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "update, admin")]
         public async Task<IActionResult> Edit(int id, [Bind("ContactId,FirstName,LastName,Organization,Title,StreetAddress1,City,Province,PostalCode,Subscribed,Email,Phone,Fax,Website,BedsCount,Address2,Extension")] Contact contact)
         {
             if (id != contact.ContactId)
@@ -127,6 +133,7 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts/Delete/5
+        [Authorize(Roles = "delete, admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -147,6 +154,7 @@ namespace dbms_mvc.Controllers
         // POST: Contacts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "delete, admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var contact = await _context.contacts.FindAsync(id);
@@ -159,6 +167,7 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "create, admin")]
         public async Task<IActionResult> Upload()
         {
             return View();
@@ -167,6 +176,7 @@ namespace dbms_mvc.Controllers
 
         [HttpPost, ActionName("Upload")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "create, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             GetFormData(file);
