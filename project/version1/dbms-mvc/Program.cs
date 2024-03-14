@@ -10,10 +10,10 @@ public class Program
     {
 
         var builder = WebApplication.CreateBuilder(args);
-        var ConfigurationManager = builder.Configuration;
+        var configurationManager = builder.Configuration;
 
         // Add services to the container.
-        var connectionString = ConfigurationManager.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        var connectionString = configurationManager.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -27,7 +27,24 @@ public class Program
 
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
+        //TODO: Setup logging
+
         var app = builder.Build();
+
+        //setup DbInitializer
+        var loginSecrets = configurationManager.GetSection("Login").Get<LoginConfig>();
+        using (var scope = app.Services.CreateScope())
+        {
+            if (loginSecrets == null)
+            {
+                Console.WriteLine("AppSecrets must be set up for database seeding.");
+            }
+            else
+            {
+                DbInitializer.appSecrets = loginSecrets;
+                DbInitializer.SeedUsersAndRoles(scope.ServiceProvider).Wait();
+            }
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
