@@ -5,6 +5,13 @@
 }
 
 <h1>Index</h1>
+@using (Html.BeginForm("Index", "Contacts", FormMethod.Get))
+{
+    <p>
+        Find by name or email: @Html.TextBox("searchString")
+        <input type="submit" value="Search" />
+    </p>
+}
 
 <p>
     <a asp-action="Create">Create New</a>

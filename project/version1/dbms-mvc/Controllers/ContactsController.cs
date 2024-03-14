@@ -15,9 +15,19 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            return View(await _context.contacts.ToListAsync());
+            var contacts = from m in _context.contacts
+                           select m;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                contacts = contacts.Where(s => s.FirstName.Contains(searchString)
+                                               || s.LastName.Contains(searchString)
+                                               || s.Email.Contains(searchString));
+            }
+
+            return View(await contacts.ToListAsync());
         }
 
         // GET: Contacts/Details/5
@@ -277,6 +287,10 @@ namespace dbms_mvc.Controllers
         private bool ContactExists(int id)
         {
             return _context.contacts.Any(e => e.ContactId == id);
+        }
+        public bool Contactsearch(int id)
+        {
+            return true;
         }
     }
 }
