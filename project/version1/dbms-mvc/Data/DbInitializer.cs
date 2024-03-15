@@ -12,6 +12,7 @@ public static class DbInitializer
         "update",
         "delete",
         "upload",
+        "export",
     };
 
     public static async Task<int> SeedUsersAndRoles(IServiceProvider serviceProvider)
@@ -33,7 +34,7 @@ public static class DbInitializer
             return 2;  // should log an error message here
 
         // Check if users already exist and exit if there are
-        if (userManager.Users.Count() > 0)
+        if (userManager.Users.Count() > roleNames.Count())
             return 3;  // should log an error message here
 
         // Seed users
