@@ -70,58 +70,9 @@ public class Program
             pattern: "{controller=Home}/{action=Index}/{id?}");
         app.MapRazorPages();
 
-        using (var scope = app.Services.CreateScope())
-        {
-            EnsureRolesCreated(scope.ServiceProvider);
-            EnsureAdminCreated(scope.ServiceProvider);
-        }
-
         app.Run();
     }
 
-    private static void EnsureAdminCreated(IServiceProvider serviceProvider)
-    {
-        var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
-        string email = "admin@email.com";
-        ApplicationUser admin = userManager.FindByNameAsync(email).Result;
 
-        if (admin == null)
-        {
-            ApplicationUser newAdmin = new ApplicationUser
-            {
-                Email = email,
-                UserName = email,
-                EmailConfirmed = true,
-            };
-
-            string password = "Password!1";
-            userManager.CreateAsync(newAdmin, password);
-            Console.WriteLine("Created new admin user.");
-            ApplicationUser createdAdmin = userManager.FindByNameAsync(email).Result;
-            userManager.AddToRoleAsync(createdAdmin, "admin").Wait();
-        }
-    }
-
-    private static void EnsureRolesCreated(IServiceProvider serviceProvider)
-    {
-        var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
-        string[] roleNames = new string[] {
-            "create",
-            "delete",
-            "update",
-            "admin"
-        };
-
-        foreach (string roleName in roleNames)
-        {
-            bool roleExists = roleManager.RoleExistsAsync(roleName).Result;
-            if (!roleExists)
-            {
-                Console.WriteLine($"Adding role: {roleName}");
-                IdentityRole role = new IdentityRole(roleName);
-                roleManager.CreateAsync(role);
-            }
-        }
-    }
 }
 
