@@ -59,21 +59,29 @@ public static class DbInitializer
 
     private static async Task<int> SeedUsers(UserManager<ApplicationUser> userManager)
     {
+        List<string> adminRoles = new List<string> {
+            "admin",
+        };
+
+        List<string> userRoles = new List<string> {
+            "update",
+            "create",
+        };
         // Create admin User
-        List<(ApplicationUser, string)> appUsers = new List<(ApplicationUser, string)> {
+        List<(ApplicationUser, List<string>)> appUsers = new List<(ApplicationUser, List<string>)> {
             (new ApplicationUser {
                 UserName = "admin@email.com",
                 Email = "admin@email.com",
                 EmailConfirmed = true,
-            }, "admin" ),
+            }, adminRoles ),
             (new ApplicationUser {
                 UserName = "user@email.com",
                 Email = "user@email.com",
                 EmailConfirmed = true,
-            }, "update" ),
+            }, userRoles ),
         };
 
-        foreach ((ApplicationUser, string) appUser in appUsers)
+        foreach ((ApplicationUser, List<string>) appUser in appUsers)
         {
             var result = await CreateUser(appUser.Item1, appUser.Item2, appSecrets.AdminPassword, userManager);
             if (!result.Succeeded)
@@ -82,11 +90,11 @@ public static class DbInitializer
         return 0;
     }
 
-    private static async Task<IdentityResult> CreateUser(ApplicationUser appUser, string role,
+    private static async Task<IdentityResult> CreateUser(ApplicationUser appUser, List<string> roles,
             string password, UserManager<ApplicationUser> userManager)
     {
         var result = await userManager.CreateAsync(appUser, password);
-        result = await userManager.AddToRoleAsync(appUser, role);
+        result = await userManager.AddToRolesAsync(appUser, roles);
         return result;
     }
 
