@@ -174,6 +174,7 @@ namespace dbms_mvc.Controllers
         }
 
 
+        /// Method that is called when the upload button is clicked
         [HttpPost, ActionName("Upload")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "upload, admin")]
@@ -183,47 +184,65 @@ namespace dbms_mvc.Controllers
             return View(file);
         }
 
+        // Main function that handles logic
         private void GetFormData(IFormFile file)
         {
+            //convert file to stream
             using (var stream = file.OpenReadStream())
             {
+                //use 3rd party library to read file stream
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
-                    reader.Read();
+                    reader.Read(); //Reads the first row and stores all of the data
+                    
+                    //each column from the spreadsheet is stored as a tuple with the first element being
+                    //the name of the column. The second element is a string list that stores all of the proceeding
+                    //column values.
                     (string, List<string>)[] rows = new (string, List<string>)[reader.FieldCount];
+
+                    //Initialize each tuple with column name and empty list
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        string key = reader.GetValue(i).ToString();
+                        string key = reader.GetValue(i).ToString(); //get coluumn name
                         List<string> list = new List<string>();
                         rows[i] = new(key, list);
                     }
+
+                    //Read remaining data one row at a time
                     do {
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
                             string val;
-                            try
+                            try //get value of column if it exists
                             {
                                 val = reader.GetValue(i).ToString();
                             }
-                            catch (Exception e)
+                            catch (Exception e) // set as empty string if value is empty
                             {
                                 Console.WriteLine(e.Message);
                                 val = "";
                             }
-                            rows[i].Item2.Add(val);
+                            rows[i].Item2.Add(val); //add value to list under column name
                         }
                     }
-                    while (reader.Read());
+                    while (reader.Read()); // loop while there is more data to read in spreadsheet
+
+                    //Create contact objects based on data gathered
                     for (int i = 1; i < rows[0].Item2.Count(); i++)
                     {
                         Contact contact = new Contact();
                         foreach (var row in rows)
                         {
-                            string key = row.Item1;
-                            string val = row.Item2[i];
+                            string key = row.Item1; //column name
+                            string val = row.Item2[i]; //column value
+
+                            //pass contact object reference along with column name and value to add
+                            //to contact object
                             UpdateContact(key, val, contact);
                         }
+                        //for testing, can remove
                         Console.WriteLine(contact);
+                        //save contact to database
                         _context.contacts.Add(contact);
                         _context.SaveChanges();
                     }
@@ -231,6 +250,13 @@ namespace dbms_mvc.Controllers
             }
         }
 
+        // THIS IS THE MAIN FUNCTION TO CHANGE
+        // checks passed column name in switch case to choose which Contact property to add
+        // the value to.
+        // Params:
+        // string key: the name of the column
+        // string val: the value inside of that column
+        // Contact contact: the object reference to add the value to
         private void UpdateContact(string key, string val, Contact contact)
         {
             switch (key)
