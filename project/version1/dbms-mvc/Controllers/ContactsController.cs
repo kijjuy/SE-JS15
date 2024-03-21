@@ -180,7 +180,13 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            GetFormData(file);
+            try
+            {
+                GetFormData(file);
+            } catch (NullReferenceException) 
+            {
+                Console.WriteLine("error!");
+            }
             return View(file);
         }
 
@@ -193,22 +199,16 @@ namespace dbms_mvc.Controllers
                 //use 3rd party library to read file stream
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
-                    reader.Read(); //Reads the first row and stores all of the data
-                    
-                    //each column from the spreadsheet is stored as a tuple with the first element being
-                    //the name of the column. The second element is a string list that stores all of the proceeding
-                    //column values.
+                    reader.Read();
                     (string, List<string>)[] rows = new (string, List<string>)[reader.FieldCount];
 
                     //Initialize each tuple with column name and empty list
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        string key = reader.GetValue(i).ToString(); //get coluumn name
+                        string key = reader.GetValue(i).ToString();
                         List<string> list = new List<string>();
                         rows[i] = new(key, list);
                     }
-
-                    //Read remaining data one row at a time
                     do {
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
@@ -246,6 +246,7 @@ namespace dbms_mvc.Controllers
                         _context.contacts.Add(contact);
                         _context.SaveChanges();
                     }
+                    Console.WriteLine("check 5!");
                 }
             }
         }
@@ -316,6 +317,9 @@ namespace dbms_mvc.Controllers
                     break;
                 case "Emails":
                     contact.Email = val;
+                    break;
+                default:
+                    Console.WriteLine("triggered");
                     break;
             }
         }
