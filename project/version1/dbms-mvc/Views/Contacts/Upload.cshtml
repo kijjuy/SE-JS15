@@ -1,7 +1,3 @@
-@{
-Layout = null;
-}
-
 <!DOCTYPE html>
 
 <html>
@@ -20,12 +16,12 @@ Layout = null;
                     <label for="file"></label>
                 </dt>
                 <dd>
-                    <input type="file" name="file" id="file" accept=".xlsx, .csv" class="form-control" 
-                    onchange="validateFileType()" />
+                    <input type="file" name="file" id="file" accept=".xlsx, .csv" class="form-control"
+                        onchange="validateFileType()" />
                     <span id="fileValidation" class="text-danger"></span>
                 </dd>
             </dl>
-            <input class="btn" type="submit" value="Upload">
+            <input class="btn btn-primary" type="submit" value="Upload">
         </form>
     </div>
 </body>

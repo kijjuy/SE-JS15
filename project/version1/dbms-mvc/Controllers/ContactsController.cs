@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
+using dbms_mvc.Models;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 
 namespace dbms_mvc.Controllers
 {
-//[Authorize]
+    [Authorize]
     public class ContactsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -175,7 +176,46 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-//[Authorize(Roles = "upload, admin")]
+        public async Task<List<MergeConflictViewModel>> GetDupeContacts(List<Contact> newContacts)
+        {
+            //List of contacts that already exist in slot one, and the newly added contact in slot 2
+            List<MergeConflictViewModel> unresolvedMerges = new List<MergeConflictViewModel>();
+
+            foreach (Contact newContact in newContacts)
+            {
+
+                Contact dupeContact = await _context.contacts
+                    .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
+                    .FirstOrDefaultAsync();
+
+                if (dupeContact != null)
+                {
+                    Console.WriteLine("Adding Merge conflict");
+                    string message = "There is already a contact with that name.";
+                    unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
+                }
+            }
+
+            return unresolvedMerges;
+        }
+
+        [HttpPost, ActionName("MergeResolver")]
+        public async Task<IActionResult> MergeResolver([FromBody] IEnumerable<ReplaceViewModel> replaceViewModels)
+        {
+            foreach (ReplaceViewModel viewModel in replaceViewModels)
+            {
+                await _context.AddAsync(viewModel.NewContact);
+                Console.WriteLine($"Added contact with name: {viewModel.NewContact.FirstName} {viewModel.NewContact.LastName}");
+                var contact = await _context.contacts.FindAsync(viewModel.ReplaceContactId);
+                Console.WriteLine($"Removed contact with id: {viewModel.ReplaceContactId}");
+                _context.contacts.Remove(contact);
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+
+        [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload()
         {
             return View();
@@ -185,16 +225,24 @@ namespace dbms_mvc.Controllers
         /// Method that is called when the upload button is clicked
         [HttpPost, ActionName("Upload")]
         [ValidateAntiForgeryToken]
-        //[Authorize(Roles = "upload, admin")]
+        [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            GetFormData(file);
-            return View(file);
+            List<Contact> newContacts = GetFormData(file);
+            List<MergeConflictViewModel> unresolvedMerges = await GetDupeContacts(newContacts);
+            if (unresolvedMerges.Count() > 0)
+            {
+                return View("ResolveConflicts", unresolvedMerges);
+            }
+            await _context.contacts.AddRangeAsync(newContacts);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // Main function that handles logic
-        private void GetFormData(IFormFile file)
+        private List<Contact> GetFormData(IFormFile file)
         {
+            List<Contact> newContacts = new List<Contact>();
             //convert file to stream
             using (var stream = file.OpenReadStream())
             {
@@ -202,7 +250,7 @@ namespace dbms_mvc.Controllers
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
                     reader.Read(); //Reads the first row and stores all of the data
-                    
+
                     //each column from the spreadsheet is stored as a tuple with the first element being
                     //the name of the column. The second element is a string list that stores all of the proceeding
                     //column values.
@@ -217,7 +265,8 @@ namespace dbms_mvc.Controllers
                     }
 
                     //Read remaining data one row at a time
-                    do {
+                    do
+                    {
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
                             string val;
@@ -251,11 +300,11 @@ namespace dbms_mvc.Controllers
                         //for testing, can remove
                         Console.WriteLine(contact);
                         //save contact to database
-                        _context.contacts.Add(contact);
-                        _context.SaveChanges();
+                        newContacts.Add(contact);
                     }
                 }
             }
+            return (newContacts);
         }
 
         // THIS IS THE MAIN FUNCTION TO CHANGE
@@ -315,7 +364,9 @@ namespace dbms_mvc.Controllers
                     try
                     {
                         contact.BedsCount = int.Parse(val);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
                         Console.WriteLine("Bedcount not set");
                     }
                     break;
