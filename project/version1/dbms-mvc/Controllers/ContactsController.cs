@@ -321,7 +321,7 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        private void Export()
+        private void Export(IEnumerable<Contact> contacts)
         {
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Sheet1");
@@ -342,6 +342,43 @@ namespace dbms_mvc.Controllers
             worksheet.Cell(1, 14).Value = "Beds Count";
             worksheet.Cell(1, 15).Value = "Address 2";
             worksheet.Cell(1, 16).Value = "Extension";
+
+            List<string> firstName = new List<string> { };
+            List<string> lastName = new List<string> { };
+            List<string> organization = new List<string> { };
+            List<string> title = new List<string> { };
+            List<string> streetAddress1 = new List<string> { };
+            List<string> city = new List<string> { };
+            List<string> province = new List<string> { };
+            List<string> postalCode = new List<string> { };
+            List<string> subscribed = new List<string> { };
+            List<string> email = new List<string> { };
+            List<string> phone = new List<string> { };
+            List<string> fax = new List<string> { };
+            List<string> website = new List<string> { };
+            List<string> bedsCount = new List<string> { };
+            List<string> address2 = new List<string> { };
+            List<string> extension = new List<string> { };
+
+            foreach (Contact contact in contacts)
+            {
+                firstName.Add(contact.FirstName);
+                lastName.Add(contact.LastName);
+                organization.Add(contact.Organization);
+                title.Add(contact.Title);
+                streetAddress1.Add(contact.StreetAddress1);
+                city.Add(contact.City);
+                province.Add(contact.Province);
+                postalCode.Add(contact.PostalCode);
+                subscribed.Add(contact.Subscribed);
+                email.Add(contact.Email);
+                phone.Add(contact.Phone);
+                fax.Add(contact.Fax);
+                website.Add(contact.Website);
+                bedsCount.Add(contact.BedsCount.ToString());
+                address2.Add(contact.Address2);
+                extension.Add(contact.Extension);
+            }
         }
 
         private bool ContactExists(int id)
