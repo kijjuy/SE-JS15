@@ -322,8 +322,9 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        private void Export(IEnumerable<Contact> contacts)
+        private void Export()
         {
+            var contacts = from m in _context.contacts select m;
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Sheet1");
 
