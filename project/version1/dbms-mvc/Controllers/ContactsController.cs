@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace dbms_mvc.Controllers
 {
-    [Authorize]
+//[Authorize]
     public class ContactsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,9 +24,17 @@ namespace dbms_mvc.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                contacts = contacts.Where(s => s.FirstName.Contains(searchString)
-                                               || s.LastName.Contains(searchString)
-                                               || s.Email.Contains(searchString));
+                var lowerCaseSearchString = searchString.ToLower();
+                contacts = contacts.Where(s => s.FirstName.ToLower().Contains(lowerCaseSearchString)
+                                            || s.LastName.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Email.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Organization.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Title.ToLower().Contains(lowerCaseSearchString)
+                                            || s.StreetAddress1.ToLower().Contains(lowerCaseSearchString)
+                                            || s.City.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Province.ToLower().Contains(lowerCaseSearchString)
+                                            || s.PostalCode.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Phone.ToLower().Contains(lowerCaseSearchString));
             }
 
             return View(await contacts.ToListAsync());
@@ -167,7 +175,7 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "upload, admin")]
+//[Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload()
         {
             return View();
@@ -177,7 +185,7 @@ namespace dbms_mvc.Controllers
         /// Method that is called when the upload button is clicked
         [HttpPost, ActionName("Upload")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "upload, admin")]
+        //[Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             GetFormData(file);
