@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using dbms_mvc.Data;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
+using ClosedXML.Excel;
 
 namespace dbms_mvc.Controllers
 {
@@ -318,6 +319,29 @@ namespace dbms_mvc.Controllers
                     contact.Email = val;
                     break;
             }
+        }
+
+        private void Export()
+        {
+            var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Sheet1");
+
+            worksheet.Cell(1, 1).Value = "First Name";
+            worksheet.Cell(1, 2).Value = "Last Name";
+            worksheet.Cell(1, 3).Value = "Organization";
+            worksheet.Cell(1, 4).Value = "Title";
+            worksheet.Cell(1, 5).Value = "Street Address 1";
+            worksheet.Cell(1, 6).Value = "City";
+            worksheet.Cell(1, 7).Value = "Province";
+            worksheet.Cell(1, 8).Value = "Postal Code";
+            worksheet.Cell(1, 9).Value = "Subscribed";
+            worksheet.Cell(1, 10).Value = "Email";
+            worksheet.Cell(1, 11).Value = "Phone";
+            worksheet.Cell(1, 12).Value = "Fax";
+            worksheet.Cell(1, 13).Value = "Website";
+            worksheet.Cell(1, 14).Value = "Beds Count";
+            worksheet.Cell(1, 15).Value = "Address 2";
+            worksheet.Cell(1, 16).Value = "Extension";
         }
 
         private bool ContactExists(int id)
