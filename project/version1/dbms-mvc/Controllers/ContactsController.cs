@@ -25,9 +25,17 @@ namespace dbms_mvc.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                contacts = contacts.Where(s => s.FirstName.Contains(searchString)
-                                               || s.LastName.Contains(searchString)
-                                               || s.Email.Contains(searchString));
+                var lowerCaseSearchString = searchString.ToLower();
+                contacts = contacts.Where(s => s.FirstName.ToLower().Contains(lowerCaseSearchString)
+                                            || s.LastName.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Email.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Organization.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Title.ToLower().Contains(lowerCaseSearchString)
+                                            || s.StreetAddress1.ToLower().Contains(lowerCaseSearchString)
+                                            || s.City.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Province.ToLower().Contains(lowerCaseSearchString)
+                                            || s.PostalCode.ToLower().Contains(lowerCaseSearchString)
+                                            || s.Phone.ToLower().Contains(lowerCaseSearchString));
             }
 
             return View(await contacts.ToListAsync());
