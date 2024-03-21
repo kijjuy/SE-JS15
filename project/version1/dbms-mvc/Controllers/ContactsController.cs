@@ -4,6 +4,7 @@ using dbms_mvc.Data;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
+using static Azure.Core.HttpHeader;
 
 namespace dbms_mvc.Controllers
 {
@@ -379,6 +380,28 @@ namespace dbms_mvc.Controllers
                 address2.Add(contact.Address2);
                 extension.Add(contact.Extension);
             }
+
+            for (int i = 0; i < contacts.Count(); i++)
+            {
+                worksheet.Cell(i + 2, 1).Value = firstName[i];
+                worksheet.Cell(i + 2, 2).Value = lastName[i];
+                worksheet.Cell(i + 2, 3).Value = organization[i];
+                worksheet.Cell(i + 2, 1).Value = title[i];
+                worksheet.Cell(i + 2, 2).Value = streetAddress1[i];
+                worksheet.Cell(i + 2, 3).Value = city[i];
+                worksheet.Cell(i + 2, 1).Value = province[i];
+                worksheet.Cell(i + 2, 2).Value = postalCode[i];
+                worksheet.Cell(i + 2, 3).Value = subscribed[i];
+                worksheet.Cell(i + 2, 1).Value = email[i];
+                worksheet.Cell(i + 2, 2).Value = phone[i];
+                worksheet.Cell(i + 2, 3).Value = fax[i];
+                worksheet.Cell(i + 2, 1).Value = website[i];
+                worksheet.Cell(i + 2, 2).Value = bedsCount[i];
+                worksheet.Cell(i + 2, 3).Value = address2[i];
+                worksheet.Cell(i + 2, 1).Value = extension[i];
+            }
+
+            workbook.SaveAs(@"c:\test\files\work1_4.13.14.xlsx");
         }
 
         private bool ContactExists(int id)
