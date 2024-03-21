@@ -401,7 +401,7 @@ namespace dbms_mvc.Controllers
                 worksheet.Cell(i + 2, 1).Value = extension[i];
             }
 
-            workbook.SaveAs(@"c:\test\files\work1_4.13.14.xlsx");
+            workbook.SaveAs(@"wwwroot\spreadsheets\contacts.xlsx");
         }
 
         private bool ContactExists(int id)
