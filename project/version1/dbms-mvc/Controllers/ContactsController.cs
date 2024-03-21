@@ -322,8 +322,11 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        private void Export()
+        [HttpPost, ActionName("Export")]
+        public void Export()
         {
+            Console.WriteLine("Method called");
+
             var contacts = from m in _context.contacts select m;
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Sheet1");
