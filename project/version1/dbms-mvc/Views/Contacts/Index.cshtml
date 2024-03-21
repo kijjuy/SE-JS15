@@ -16,7 +16,7 @@
 <p>
     <a asp-action="Create">Create New</a>
     <form>
-        <input type="button" value="Download" onClick="Export();window.location.href='\wwwroot\spreadsheets\contacts.xlsx'">
+        <input type="button" value="Download" onClick="location.href='@Url.Action("Export", "Contacts")';window.location.href='\wwwroot\spreadsheets\contacts.xlsx'">
     </form>
 
 </p>
