@@ -5,7 +5,6 @@ using dbms_mvc.Models;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
-using static Azure.Core.HttpHeader;
 
 namespace dbms_mvc.Controllers
 {
@@ -207,9 +206,7 @@ namespace dbms_mvc.Controllers
             foreach (ReplaceViewModel viewModel in replaceViewModels)
             {
                 await _context.AddAsync(viewModel.NewContact);
-                Console.WriteLine($"Added contact with name: {viewModel.NewContact.FirstName} {viewModel.NewContact.LastName}");
                 var contact = await _context.contacts.FindAsync(viewModel.ReplaceContactId);
-                Console.WriteLine($"Removed contact with id: {viewModel.ReplaceContactId}");
                 _context.contacts.Remove(contact);
             }
             await _context.SaveChangesAsync();
@@ -382,89 +379,74 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPost, ActionName("Export")]
-        public void Export()
+        public IActionResult Export([FromBody] IList<Contact> contacts)
         {
-            Console.WriteLine("Method called");
-
-            var contacts = from m in _context.contacts select m;
+            if (contacts == null)
+            {
+                //TODO: return error json response if null
+                Console.WriteLine("---- Contacts is null. ----");
+            }
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Sheet1");
 
-            worksheet.Cell(1, 1).Value = "First Name";
-            worksheet.Cell(1, 2).Value = "Last Name";
+            worksheet.Cell(1, 1).Value = "FirstName";
+            worksheet.Cell(1, 2).Value = "LastName";
             worksheet.Cell(1, 3).Value = "Organization";
             worksheet.Cell(1, 4).Value = "Title";
-            worksheet.Cell(1, 5).Value = "Street Address 1";
+            worksheet.Cell(1, 5).Value = "StreetAddress";
             worksheet.Cell(1, 6).Value = "City";
             worksheet.Cell(1, 7).Value = "Province";
-            worksheet.Cell(1, 8).Value = "Postal Code";
+            worksheet.Cell(1, 8).Value = "PostalCode";
             worksheet.Cell(1, 9).Value = "Subscribed";
             worksheet.Cell(1, 10).Value = "Email";
             worksheet.Cell(1, 11).Value = "Phone";
             worksheet.Cell(1, 12).Value = "Fax";
             worksheet.Cell(1, 13).Value = "Website";
-            worksheet.Cell(1, 14).Value = "Beds Count";
-            worksheet.Cell(1, 15).Value = "Address 2";
+            worksheet.Cell(1, 14).Value = "BedsCount";
+            worksheet.Cell(1, 15).Value = "Address2";
             worksheet.Cell(1, 16).Value = "Extension";
-
-            List<string> firstName = new List<string> { };
-            List<string> lastName = new List<string> { };
-            List<string> organization = new List<string> { };
-            List<string> title = new List<string> { };
-            List<string> streetAddress1 = new List<string> { };
-            List<string> city = new List<string> { };
-            List<string> province = new List<string> { };
-            List<string> postalCode = new List<string> { };
-            List<string> subscribed = new List<string> { };
-            List<string> email = new List<string> { };
-            List<string> phone = new List<string> { };
-            List<string> fax = new List<string> { };
-            List<string> website = new List<string> { };
-            List<string> bedsCount = new List<string> { };
-            List<string> address2 = new List<string> { };
-            List<string> extension = new List<string> { };
-
-            foreach (Contact contact in contacts)
-            {
-                firstName.Add(contact.FirstName);
-                lastName.Add(contact.LastName);
-                organization.Add(contact.Organization);
-                title.Add(contact.Title);
-                streetAddress1.Add(contact.StreetAddress1);
-                city.Add(contact.City);
-                province.Add(contact.Province);
-                postalCode.Add(contact.PostalCode);
-                subscribed.Add(contact.Subscribed);
-                email.Add(contact.Email);
-                phone.Add(contact.Phone);
-                fax.Add(contact.Fax);
-                website.Add(contact.Website);
-                bedsCount.Add(contact.BedsCount.ToString());
-                address2.Add(contact.Address2);
-                extension.Add(contact.Extension);
-            }
+            worksheet.Cell(1, 17).Value = "MailingList";
 
             for (int i = 0; i < contacts.Count(); i++)
             {
-                worksheet.Cell(i + 2, 1).Value = firstName[i];
-                worksheet.Cell(i + 2, 2).Value = lastName[i];
-                worksheet.Cell(i + 2, 3).Value = organization[i];
-                worksheet.Cell(i + 2, 1).Value = title[i];
-                worksheet.Cell(i + 2, 2).Value = streetAddress1[i];
-                worksheet.Cell(i + 2, 3).Value = city[i];
-                worksheet.Cell(i + 2, 1).Value = province[i];
-                worksheet.Cell(i + 2, 2).Value = postalCode[i];
-                worksheet.Cell(i + 2, 3).Value = subscribed[i];
-                worksheet.Cell(i + 2, 1).Value = email[i];
-                worksheet.Cell(i + 2, 2).Value = phone[i];
-                worksheet.Cell(i + 2, 3).Value = fax[i];
-                worksheet.Cell(i + 2, 1).Value = website[i];
-                worksheet.Cell(i + 2, 2).Value = bedsCount[i];
-                worksheet.Cell(i + 2, 3).Value = address2[i];
-                worksheet.Cell(i + 2, 1).Value = extension[i];
+                worksheet.Cell(i + 2, 1).Value = contacts[i].FirstName;
+                worksheet.Cell(i + 2, 2).Value = contacts[i].LastName;
+                worksheet.Cell(i + 2, 3).Value = contacts[i].Organization;
+                worksheet.Cell(i + 2, 4).Value = contacts[i].Title;
+                worksheet.Cell(i + 2, 5).Value = contacts[i].StreetAddress1;
+                worksheet.Cell(i + 2, 6).Value = contacts[i].City;
+                worksheet.Cell(i + 2, 7).Value = contacts[i].Province;
+                worksheet.Cell(i + 2, 8).Value = contacts[i].PostalCode;
+                worksheet.Cell(i + 2, 9).Value = contacts[i].Subscribed;
+                worksheet.Cell(i + 2, 10).Value = contacts[i].Email;
+                worksheet.Cell(i + 2, 11).Value = contacts[i].Phone;
+                worksheet.Cell(i + 2, 12).Value = contacts[i].Fax;
+                worksheet.Cell(i + 2, 13).Value = contacts[i].Website;
+                worksheet.Cell(i + 2, 14).Value = contacts[i].BedsCount;
+                worksheet.Cell(i + 2, 15).Value = contacts[i].Address2;
+                worksheet.Cell(i + 2, 16).Value = contacts[i].Extension;
+                worksheet.Cell(i + 2, 17).Value = contacts[i].MailingList;
             }
 
-            workbook.SaveAs(@"wwwroot\spreadsheets\contacts.xlsx");
+            using (MemoryStream stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                byte[] fileData = stream.ToArray();
+                stream.Close();
+                Console.WriteLine(fileData.ToString());
+                
+                //TODO: add leading zero to month if 1 digit
+                string fileName = $"{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year}-Contacts.xlsx";
+
+                var response = new 
+                {
+                    fileStream = fileData,
+                    fileName = fileName,
+                    fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+
+                return Json(response);
+            }
         }
 
         private bool ContactExists(int id)
