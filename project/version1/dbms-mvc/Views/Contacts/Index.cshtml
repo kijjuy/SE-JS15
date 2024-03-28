@@ -95,26 +95,25 @@
                 type: "POST",
                 url: url,
                 contentType: "application/json",
-                dataType: "json",
+                dataType: "binary",
                 data: JSON.stringify(model),
-                success: function (response) {
-                    const blob = new Blob([response.fileStream], { type: response.fileType });
-                    console.log(blob);
-
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = window.URL.createObjectURL(blob);
-                    downloadLink.download = response.fileName;
-                    downloadLink.style.display = 'none';
-
-                    document.body.appendChild(downloadLink);
-
-                    downloadLink.click();
-
-                    window.URL.revokeObjectURL(downloadLink.href);
-                    document.body.removeChild(downloadLink);
+	      xhrFields: {
+		responseType: 'blob'
+	      },
+                success: function (data, status, xhr) {
+		  //TODO: Stop logging data
+		  if(status === "success") {
+		    const url = URL.createObjectURL(data);
+		    const a = document.createElement("a");
+		    a.href = url;
+		    a.download = "contacts.xlsx";
+		    document.body.appendChild(a);
+		    a.click();
+		  }
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    console.log(xhr, textStatus, errorThrown);
+		  console.log("error");
+		  console.log(/*xhr, */textStatus, errorThrown);
                 }
             });
         }
