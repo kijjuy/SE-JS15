@@ -5,6 +5,7 @@ using dbms_mvc.Models;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
+using System.IO;
 
 namespace dbms_mvc.Controllers
 {
@@ -194,7 +195,10 @@ namespace dbms_mvc.Controllers
                     Console.WriteLine("Adding Merge conflict");
                     string message = "There is already a contact with that name.";
                     unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                }
+                } else {
+		    await _context.contacts.AddAsync(newContact);
+		    await _context.SaveChangesAsync();
+		}
             }
 
             return unresolvedMerges;
@@ -206,7 +210,9 @@ namespace dbms_mvc.Controllers
             foreach (ReplaceViewModel viewModel in replaceViewModels)
             {
                 await _context.AddAsync(viewModel.NewContact);
+                Console.WriteLine($"Added contact with name: {viewModel.NewContact.FirstName} {viewModel.NewContact.LastName}");
                 var contact = await _context.contacts.FindAsync(viewModel.ReplaceContactId);
+                Console.WriteLine($"Removed contact with id: {viewModel.ReplaceContactId}");
                 _context.contacts.Remove(contact);
             }
             await _context.SaveChangesAsync();
@@ -379,16 +385,16 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPost, ActionName("Export")]
-        public IActionResult Export([FromBody] IList<Contact> contacts)
+        public  IActionResult Export([FromBody] IList<Contact> contacts)
         {
+	    //TODO: Handle null properly
             if (contacts == null)
             {
-                //TODO: return error json response if null
                 Console.WriteLine("---- Contacts is null. ----");
             }
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Sheet1");
-
+	    
             worksheet.Cell(1, 1).Value = "FirstName";
             worksheet.Cell(1, 2).Value = "LastName";
             worksheet.Cell(1, 3).Value = "Organization";
@@ -428,26 +434,19 @@ namespace dbms_mvc.Controllers
                 worksheet.Cell(i + 2, 17).Value = contacts[i].MailingList;
             }
 
-            using (MemoryStream stream = new MemoryStream())
-            {
-                workbook.SaveAs(stream);
-                byte[] fileData = stream.ToArray();
-                stream.Close();
-                Console.WriteLine(fileData.ToString());
-                
-                //TODO: add leading zero to month if 1 digit
-                string fileName = $"{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year}-Contacts.xlsx";
-
-                var response = new 
-                {
-                    fileStream = fileData,
-                    fileName = fileName,
-                    fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                };
-
-                return Json(response);
-            }
+	    using(MemoryStream memStream = new MemoryStream()) {
+	      workbook.SaveAs(memStream);
+	      byte[] bytes = memStream.ToArray();
+	      return File(bytes, "application/vnd.ms-excel", GetDateString());
+	    }
         }
+
+	private string GetDateString() {
+	  DateTime date = DateTime.Now;
+	  string dateString = 
+	    $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
+	  return dateString;
+	}
 
         private bool ContactExists(int id)
         {
