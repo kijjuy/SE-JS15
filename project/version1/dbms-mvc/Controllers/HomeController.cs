@@ -1,12 +1,7 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using dbms_mvc.Models;
-using Microsoft.AspNetCore.Authorization;
-
-
+using System.Diagnostics; using Microsoft.AspNetCore.Mvc; using dbms_mvc.Models; using Microsoft.AspNetCore.Authorization;
 namespace dbms_mvc.Controllers;
 
-[Authorize(Roles = "SuperAdmin")]
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -16,7 +11,6 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    [AllowAnonymous]
     public IActionResult Index()
     {
         return View();
