@@ -113,7 +113,7 @@ namespace dbms_mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "update, admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ContactId,FirstName,LastName,Organization,Title,StreetAddress1,City,Province,PostalCode,Subscribed,Email,Phone,Fax,Website,BedsCount,Address2,Extension")] Contact contact)
+        public async Task<IActionResult> Edit(int id, [Bind("ContactId,FirstName,LastName,Organization,Title,StreetAddress1,City,Province,PostalCode,Subscribed,Email,Phone,Fax,Website,BedsCount,Address2,Extension,MailingList")] Contact contact)
         {
             if (id != contact.ContactId)
             {
@@ -190,16 +190,16 @@ namespace dbms_mvc.Controllers
                     .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
                     .FirstOrDefaultAsync();
 
-                if (dupeContact != null)
+                if (dupeContact != null && !dupeContact.Equals(newContact))
                 {
                     Console.WriteLine("Adding Merge conflict");
                     string message = "There is already a contact with that name.";
                     unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                } else {
-		    await _context.contacts.AddAsync(newContact);
-		    await _context.SaveChangesAsync();
+                } else if(dupeContact != null) {
+		    _context.contacts.Add(newContact);
 		}
             }
+	    _context.SaveChanges();
 
             return unresolvedMerges;
         }
@@ -239,8 +239,6 @@ namespace dbms_mvc.Controllers
             {
                 return View("ResolveConflicts", unresolvedMerges);
             }
-            await _context.contacts.AddRangeAsync(newContacts);
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
