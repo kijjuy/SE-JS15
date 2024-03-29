@@ -185,17 +185,21 @@ namespace dbms_mvc.Controllers
 
             foreach (Contact newContact in newContacts)
             {
+	      if(newContact.FirstName == ""){
+		continue;
+	      }
 
                 Contact dupeContact = await _context.contacts
                     .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
                     .FirstOrDefaultAsync();
 
-                if (dupeContact != null && !dupeContact.Equals(newContact))
+                if (dupeContact != null)
                 {
                     Console.WriteLine("Adding Merge conflict");
                     string message = "There is already a contact with that name.";
                     unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                } else if(dupeContact != null) {
+                } else if(newContact != null && dupeContact == null) {
+		  Console.WriteLine("------------------ Adding new contact ------------------");
 		    _context.contacts.Add(newContact);
 		}
             }
@@ -210,7 +214,7 @@ namespace dbms_mvc.Controllers
             foreach (ReplaceViewModel viewModel in replaceViewModels)
             {
                 await _context.AddAsync(viewModel.NewContact);
-                Console.WriteLine($"Added contact with name: {viewModel.NewContact.FirstName} {viewModel.NewContact.LastName}");
+                Console.WriteLine($"--------------------  Added contact with name: {viewModel.NewContact.FirstName} {viewModel.NewContact.LastName}");
                 var contact = await _context.contacts.FindAsync(viewModel.ReplaceContactId);
                 Console.WriteLine($"Removed contact with id: {viewModel.ReplaceContactId}");
                 _context.contacts.Remove(contact);
