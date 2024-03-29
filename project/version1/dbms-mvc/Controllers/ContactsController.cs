@@ -4,6 +4,8 @@ using dbms_mvc.Data;
 using dbms_mvc.Models;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace dbms_mvc.Controllers
 {
@@ -193,7 +195,10 @@ namespace dbms_mvc.Controllers
                     Console.WriteLine("Adding Merge conflict");
                     string message = "There is already a contact with that name.";
                     unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                }
+                } else {
+		    await _context.contacts.AddAsync(newContact);
+		    await _context.SaveChangesAsync();
+		}
             }
 
             return unresolvedMerges;
@@ -378,6 +383,70 @@ namespace dbms_mvc.Controllers
                     break;
             }
         }
+
+        [HttpPost, ActionName("Export")]
+        public  IActionResult Export([FromBody] IList<Contact> contacts)
+        {
+	    //TODO: Handle null properly
+            if (contacts == null)
+            {
+                Console.WriteLine("---- Contacts is null. ----");
+            }
+            var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Sheet1");
+	    
+            worksheet.Cell(1, 1).Value = "FirstName";
+            worksheet.Cell(1, 2).Value = "LastName";
+            worksheet.Cell(1, 3).Value = "Organization";
+            worksheet.Cell(1, 4).Value = "Title";
+            worksheet.Cell(1, 5).Value = "StreetAddress";
+            worksheet.Cell(1, 6).Value = "City";
+            worksheet.Cell(1, 7).Value = "Province";
+            worksheet.Cell(1, 8).Value = "PostalCode";
+            worksheet.Cell(1, 9).Value = "Subscribed";
+            worksheet.Cell(1, 10).Value = "Email";
+            worksheet.Cell(1, 11).Value = "Phone";
+            worksheet.Cell(1, 12).Value = "Fax";
+            worksheet.Cell(1, 13).Value = "Website";
+            worksheet.Cell(1, 14).Value = "BedsCount";
+            worksheet.Cell(1, 15).Value = "Address2";
+            worksheet.Cell(1, 16).Value = "Extension";
+            worksheet.Cell(1, 17).Value = "MailingList";
+
+            for (int i = 0; i < contacts.Count(); i++)
+            {
+                worksheet.Cell(i + 2, 1).Value = contacts[i].FirstName;
+                worksheet.Cell(i + 2, 2).Value = contacts[i].LastName;
+                worksheet.Cell(i + 2, 3).Value = contacts[i].Organization;
+                worksheet.Cell(i + 2, 4).Value = contacts[i].Title;
+                worksheet.Cell(i + 2, 5).Value = contacts[i].StreetAddress1;
+                worksheet.Cell(i + 2, 6).Value = contacts[i].City;
+                worksheet.Cell(i + 2, 7).Value = contacts[i].Province;
+                worksheet.Cell(i + 2, 8).Value = contacts[i].PostalCode;
+                worksheet.Cell(i + 2, 9).Value = contacts[i].Subscribed;
+                worksheet.Cell(i + 2, 10).Value = contacts[i].Email;
+                worksheet.Cell(i + 2, 11).Value = contacts[i].Phone;
+                worksheet.Cell(i + 2, 12).Value = contacts[i].Fax;
+                worksheet.Cell(i + 2, 13).Value = contacts[i].Website;
+                worksheet.Cell(i + 2, 14).Value = contacts[i].BedsCount;
+                worksheet.Cell(i + 2, 15).Value = contacts[i].Address2;
+                worksheet.Cell(i + 2, 16).Value = contacts[i].Extension;
+                worksheet.Cell(i + 2, 17).Value = contacts[i].MailingList;
+            }
+
+	    using(MemoryStream memStream = new MemoryStream()) {
+	      workbook.SaveAs(memStream);
+	      byte[] bytes = memStream.ToArray();
+	      return File(bytes, "application/vnd.ms-excel", GetDateString());
+	    }
+        }
+
+	private string GetDateString() {
+	  DateTime date = DateTime.Now;
+	  string dateString = 
+	    $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
+	  return dateString;
+	}
 
         private bool ContactExists(int id)
         {
