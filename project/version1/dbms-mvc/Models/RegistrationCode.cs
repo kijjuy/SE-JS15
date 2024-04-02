@@ -1,24 +1,13 @@
-using System.ComponentModel.DataAnnotations;
 
-public class RegistrationCode : ValidationAttribute
+public class RegistrationCode
 {
-    private readonly int _length = 8;
+    public Guid Token { get; set; }
+    public DateTime Expiration { get; set; }
 
-    protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+    public RegistrationCode()
     {
-        string stringVal = value as string;
-        if (stringVal == null)
-        {
-            return new ValidationResult("Value is not a string.");
-        }
-
-        if (stringVal != "asdf")
-        {
-            return new ValidationResult($"{stringVal} is not a valid registration code.");
-        }
-
-        return ValidationResult.Success;
-
-        //TODO: Implement validation using database here. Will need to add model for database.
+        Token = new Guid();
+        //TODO: Do something with this Expiration
+        Expiration = DateTime.Now.AddDays(3);
     }
 }
