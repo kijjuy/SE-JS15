@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using dbms_mvc.Models;
 
 namespace dbms_mvc.Areas.Identity.Pages.Account
 {
@@ -69,6 +70,7 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
         {
             [Required]
             [Display(Name = "Registration Code")]
+            [RegistrationCode]
             public string RegistrationCode { get; set; }
 
             /// <summary>
@@ -118,6 +120,10 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
+
+
+                Console.WriteLine("asdf");
+                Console.Beep();
 
                 if (result.Succeeded)
                 {
