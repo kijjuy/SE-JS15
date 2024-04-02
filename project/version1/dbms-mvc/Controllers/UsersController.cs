@@ -69,7 +69,7 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> AddRoleToUser([FromBody] UserRoleData roleData)
+        public async Task<IActionResult> AddRoleToUser([FromBody] UserRoleDataInputModel roleData)
         {
             string id = roleData.Id;
             string role = roleData.Role;
@@ -95,7 +95,7 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> RemoveRoleFromUser([FromBody] UserRoleData roleData)
+        public async Task<IActionResult> RemoveRoleFromUser([FromBody] UserRoleDataInputModel roleData)
         {
             string id = roleData.Id;
             string role = roleData.Role;
