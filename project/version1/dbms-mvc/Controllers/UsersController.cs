@@ -119,5 +119,10 @@ namespace dbms_mvc.Controllers
             return Json(returnSuccessMessage);
 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRegistrationCode()
+        {
+        }
     }
 }
