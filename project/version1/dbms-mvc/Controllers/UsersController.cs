@@ -123,7 +123,8 @@ namespace dbms_mvc.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRegistrationCode()
         {
-
+            var ret = new { };
+            return Json(ret);
         }
     }
 }
