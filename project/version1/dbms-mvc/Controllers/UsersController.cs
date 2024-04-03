@@ -163,7 +163,15 @@ namespace dbms_mvc.Controllers
                 return Json(errorMessage);
             }
 
-            //delete user here
+            var result = await _userManager.DeleteAsync(appUser);
+            if (!result.Succeeded)
+            {
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = "Failed to delete user. Please try again."
+                };
+            }
 
             var successMessage = new
             {
