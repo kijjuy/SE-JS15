@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 public class RegistrationCode
 {
+    //Amount of days to make the Registration Code valid for.
+    private static int DurationValidDays = 3;
+
     [Key]
     public int RegistrationCodeId { get; set; }
 
@@ -15,6 +18,11 @@ public class RegistrationCode
     {
         Token = Guid.NewGuid();
         //TODO: Do something with this Expiration
-        Expiration = DateTime.Now.AddDays(3);
+        Expiration = CreateExpirationDate();
+    }
+
+    private DateTime CreateExpirationDate()
+    {
+        return DateTime.Now.AddDays(DurationValidDays);
     }
 }
