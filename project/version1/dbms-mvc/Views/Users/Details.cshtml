@@ -62,7 +62,7 @@ AppUserViewModel appUser = Model.AppUserViewModel;
                     if(response.status === "success") {
                         updateButtonClass(buttonId);
                     } else {
-                        alert(`error changing role. message: ${response.message}."`);
+                        alert(`Error changing role. message: ${response.message}`);
                     }
                 },
                 error: function(xhr, textStatus, errorThrown) {
