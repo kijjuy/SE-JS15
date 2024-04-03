@@ -485,3 +485,5 @@ $RECYCLE.BIN/
 
 # Custom
 app.db
+app.db-shm
+app.db-wal
