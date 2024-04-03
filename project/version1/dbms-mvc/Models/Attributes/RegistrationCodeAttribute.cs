@@ -13,13 +13,11 @@ public class RegistrationTokenAttribute : ValidationAttribute
             return new ValidationResult("Registration Token must be a string.");
         }
 
-        if (regTokenStr.Length != new Guid().ToString().Length)
+        if (!Guid.TryParse(regTokenStr, out Guid _))
         {
             return new ValidationResult($"{regTokenStr} is not a valid registration code.");
         }
 
         return ValidationResult.Success;
-
-        //TODO: Implement validation using database here. Will need to add model for database.
     }
 }
