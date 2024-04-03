@@ -1,7 +1,10 @@
 @model IEnumerable<Contact>
+@using dbms_mvc.Models
 
     @{
     ViewData["Title"] = "Index";
+    var props = typeof(Contact).GetProperties().ToList();
+    props = props.Where(p => p.Name != "ContactId").ToList();
     }
 
     <style>
@@ -16,15 +19,6 @@
     </style>
 
     <h1>Index</h1>
-    @using (Html.BeginForm("Index", "Contacts", FormMethod.Get))
-    {
-    <div class="search-box">
-        <label for="searchString">Find by name or email:</label>
-        @Html.TextBox("searchString", null, new { @class = "form-control", @placeholder = "Search..." })
-        <button type="submit" class="btn btn-primary mt-2">Search</button>
-    </div>
-    }
-
 
     <a asp-action="Create" class="btn btn-success">Create New</a>
 
@@ -32,6 +26,17 @@
 
     <table class="table table-striped table-hover table-bordered">
         <thead class="thead-dark">
+	    <tr id="form-row">
+		<form asp-action="Index" asp-controller="Contacts" method="post">
+		    <button type="submit" class="btn btn-primary">Search</button>
+		    @foreach(var prop in props)
+		    {
+			<td>
+			    <input name="@prop.Name" type="text" value='@ViewData["prop-" + prop.Name]'>
+			</td>
+		    }
+		</form>
+	    </tr>
             <tr>
                 <th>@Html.DisplayNameFor(model => model.FirstName)</th>
                 <th>@Html.DisplayNameFor(model => model.LastName)</th>
@@ -44,11 +49,13 @@
                 <th>@Html.DisplayNameFor(model => model.Subscribed)</th>
                 <th>@Html.DisplayNameFor(model => model.Email)</th>
                 <th>@Html.DisplayNameFor(model => model.Phone)</th>
+                <th>@Html.DisplayNameFor(model => model.HomeCategory)</th>
                 <th>@Html.DisplayNameFor(model => model.Fax)</th>
                 <th>@Html.DisplayNameFor(model => model.Website)</th>
                 <th>@Html.DisplayNameFor(model => model.BedsCount)</th>
                 <th>@Html.DisplayNameFor(model => model.Address2)</th>
                 <th>@Html.DisplayNameFor(model => model.Extension)</th>
+                <th>@Html.DisplayNameFor(model => model.MailingList)</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -67,11 +74,13 @@
                 <td>@Html.DisplayFor(modelItem => item.Subscribed)</td>
                 <td>@Html.DisplayFor(modelItem => item.Email)</td>
                 <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.HomeCategory)</td>
                 <td>@Html.DisplayFor(modelItem => item.Fax)</td>
                 <td>@Html.DisplayFor(modelItem => item.Website)</td>
                 <td>@Html.DisplayFor(modelItem => item.BedsCount)</td>
                 <td>@Html.DisplayFor(modelItem => item.Address2)</td>
                 <td>@Html.DisplayFor(modelItem => item.Extension)</td>
+                <td>@Html.DisplayFor(modelItem => item.MailingList)</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.ContactId" class="btn btn-primary btn-sm">Edit</a>
                     <a asp-action="Details" asp-route-id="@item.ContactId" class="btn btn-secondary btn-sm">Details</a>
