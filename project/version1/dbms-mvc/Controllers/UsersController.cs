@@ -12,13 +12,15 @@ namespace dbms_mvc.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ILogger<UsersController> _logger;
 
         public UsersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
-                RoleManager<IdentityRole> roleManager)
+                RoleManager<IdentityRole> roleManager, ILogger<UsersController> logger)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _logger = logger;
         }
 
         // GET: Users
@@ -142,7 +144,7 @@ namespace dbms_mvc.Controllers
             ApplicationUser loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             if (appUser == null)
             {
-                //Add logging
+                _logger.LogError($"Could not find user with id: {appUser.Id} when trying to delete.");
                 var errorMessage = new
                 {
                     status = "error",
@@ -153,7 +155,7 @@ namespace dbms_mvc.Controllers
 
             if (appUser.Equals(loggedInUser))
             {
-                //log
+                _logger.LogWarning($"User with id: {loggedInUser.Id} attempted to delete their own account.");
                 //TODO: create class/struct for error and success messages
                 var errorMessage = new
                 {
@@ -166,6 +168,12 @@ namespace dbms_mvc.Controllers
             var result = await _userManager.DeleteAsync(appUser);
             if (!result.Succeeded)
             {
+                string errors = "";
+                foreach (var error in result.Errors)
+                {
+                    errors += error.Description + "\n";
+                }
+                _logger.LogError($"User manager failed to delete user. Errors: {errors}");
                 var errorMessage = new
                 {
                     status = "error",
@@ -173,6 +181,7 @@ namespace dbms_mvc.Controllers
                 };
             }
 
+            _logger.LogInformation($"User with id: {appUser.Id} successfully deleted.");
             var successMessage = new
             {
                 status = "success",
