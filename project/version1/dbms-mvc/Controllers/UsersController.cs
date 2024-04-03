@@ -133,5 +133,24 @@ namespace dbms_mvc.Controllers
             };
             return Json(ret);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser([FromBody] ModifyRoleViewModel viewModel)
+        //TODO: change name of ModifyRoleViewModel to be more general
+        {
+            string appUserId = viewModel.AppUserViewModel.Id;
+            ApplicationUser appUser = await _userManager.FindByIdAsync(appUserId);
+            if (appUser == null)
+            {
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = $"There was an error finding the user with id: {appUserId}. Please try again."
+                };
+                return Json(errorMessage);
+            }
+            //May have to return json here and have javascript redirect
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
