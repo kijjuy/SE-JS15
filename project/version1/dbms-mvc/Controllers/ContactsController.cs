@@ -185,9 +185,10 @@ namespace dbms_mvc.Controllers
 
             foreach (Contact newContact in newContacts)
             {
-	      if(newContact.FirstName == ""){
-		continue;
-	      }
+                if (newContact.FirstName == "")
+                {
+                    continue;
+                }
 
                 Contact dupeContact = await _context.contacts
                     .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
@@ -198,25 +199,27 @@ namespace dbms_mvc.Controllers
                     Console.WriteLine("Adding Merge conflict");
                     string message = "There is already a contact with that name.";
                     unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                } else if(newContact != null && dupeContact == null) {
-		  Console.WriteLine("------------------ Adding new contact ------------------");
-		    _context.contacts.Add(newContact);
-		}
+                }
+                else if (newContact != null && dupeContact == null)
+                {
+                    Console.WriteLine("------------------ Adding new contact ------------------");
+                    _context.contacts.Add(newContact);
+                }
             }
-	    _context.SaveChanges();
+            _context.SaveChanges();
 
             return unresolvedMerges;
         }
 
         [HttpPost, ActionName("MergeResolver")]
-        public async Task<IActionResult> MergeResolver([FromBody] IEnumerable<ReplaceViewModel> replaceViewModels)
+        public async Task<IActionResult> MergeResolver([FromBody] IEnumerable<ReplaceInputModel> replaceInputModels)
         {
-            foreach (ReplaceViewModel viewModel in replaceViewModels)
+            foreach (var inputModel in replaceInputModels)
             {
-                await _context.AddAsync(viewModel.NewContact);
-                Console.WriteLine($"--------------------  Added contact with name: {viewModel.NewContact.FirstName} {viewModel.NewContact.LastName}");
-                var contact = await _context.contacts.FindAsync(viewModel.ReplaceContactId);
-                Console.WriteLine($"Removed contact with id: {viewModel.ReplaceContactId}");
+                await _context.AddAsync(inputModel.NewContact);
+                Console.WriteLine($"--------------------  Added contact with name: {inputModel.NewContact.FirstName} {inputModel.NewContact.LastName}");
+                var contact = await _context.contacts.FindAsync(inputModel.ReplaceContactId);
+                Console.WriteLine($"Removed contact with id: {inputModel.ReplaceContactId}");
                 _context.contacts.Remove(contact);
             }
             await _context.SaveChangesAsync();
@@ -387,16 +390,16 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPost, ActionName("Export")]
-        public  IActionResult Export([FromBody] IList<Contact> contacts)
+        public IActionResult Export([FromBody] IList<Contact> contacts)
         {
-	    //TODO: Handle null properly
+            //TODO: Handle null properly
             if (contacts == null)
             {
                 Console.WriteLine("---- Contacts is null. ----");
             }
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Sheet1");
-	    
+
             worksheet.Cell(1, 1).Value = "FirstName";
             worksheet.Cell(1, 2).Value = "LastName";
             worksheet.Cell(1, 3).Value = "Organization";
@@ -436,19 +439,21 @@ namespace dbms_mvc.Controllers
                 worksheet.Cell(i + 2, 17).Value = contacts[i].MailingList;
             }
 
-	    using(MemoryStream memStream = new MemoryStream()) {
-	      workbook.SaveAs(memStream);
-	      byte[] bytes = memStream.ToArray();
-	      return File(bytes, "application/vnd.ms-excel", GetDateString());
-	    }
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                workbook.SaveAs(memStream);
+                byte[] bytes = memStream.ToArray();
+                return File(bytes, "application/vnd.ms-excel", GetDateString());
+            }
         }
 
-	private string GetDateString() {
-	  DateTime date = DateTime.Now;
-	  string dateString = 
-	    $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
-	  return dateString;
-	}
+        private string GetDateString()
+        {
+            DateTime date = DateTime.Now;
+            string dateString =
+              $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
+            return dateString;
+        }
 
         private bool ContactExists(int id)
         {

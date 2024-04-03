@@ -69,7 +69,7 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> AddRoleToUser([FromBody] UserRoleData roleData)
+        public async Task<IActionResult> AddRoleToUser([FromBody] UserRoleDataInputModel roleData)
         {
             string id = roleData.Id;
             string role = roleData.Role;
@@ -95,7 +95,7 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> RemoveRoleFromUser([FromBody] UserRoleData roleData)
+        public async Task<IActionResult> RemoveRoleFromUser([FromBody] UserRoleDataInputModel roleData)
         {
             string id = roleData.Id;
             string role = roleData.Role;
@@ -118,6 +118,20 @@ namespace dbms_mvc.Controllers
             };
             return Json(returnSuccessMessage);
 
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRegistrationCode()
+        {
+            RegistrationCode registrationCode = new RegistrationCode();
+            await _context.registrationCodes.AddAsync(registrationCode);
+            await _context.SaveChangesAsync();
+            var ret = new
+            {
+                registrationCode.Token,
+                registrationCode.Expiration
+            };
+            return Json(ret);
         }
     }
 }

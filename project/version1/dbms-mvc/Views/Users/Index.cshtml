@@ -7,6 +7,8 @@
 
 <h1>@title</h1>
 
+<div id="getTokenButton" class="btn btn-primary">Get new registration token</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -45,3 +47,29 @@
 }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+	const url = "/Users/GetRegistrationCode"
+
+	$(document).ready(function() {
+	    $('#getTokenButton').click(function() {
+		sendTokenRequest();
+	    });
+	});
+
+	function sendTokenRequest() {
+	    $.ajax({
+		type: "GET",
+		url: url,
+		contentType: "application/json",
+		success: function(response) {
+		    alert(`User registration token is:\n\n${response.token}`);
+		},
+		error: function(xhr, textStatus, errorThrown) {
+		    console.log("error");
+		}
+	    });
+	}
+    </script>
+}

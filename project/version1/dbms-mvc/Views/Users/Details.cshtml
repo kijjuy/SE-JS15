@@ -44,7 +44,7 @@ AppUserViewModel appUser = Model.AppUserViewModel;
 
         function sendRequest(url, event) {
             const buttonId = event.target.id;
-            const UserRoleData = {
+            const UserRoleDataInputModel = {
                 Id: userId,
                 Role: buttonId
             };
@@ -54,7 +54,7 @@ AppUserViewModel appUser = Model.AppUserViewModel;
                 url: url,
                 contentType: "application/json",
                 dataType: "json",
-                data: JSON.stringify(UserRoleData),
+                data: JSON.stringify(UserRoleDataInputModel),
                 success: function(response) {
                     if(response.status === "success") {
                         updateButtonClass(buttonId);

@@ -1,5 +1,6 @@
 
-public class UserRoleData {
+public class UserRoleDataInputModel
+{
 
     public string Id { get; set; }
 
