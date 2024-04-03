@@ -10,8 +10,8 @@ namespace dbms_mvc.Controllers
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private UserManager<ApplicationUser> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public UsersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
                 RoleManager<IdentityRole> roleManager)
@@ -132,6 +132,55 @@ namespace dbms_mvc.Controllers
                 registrationCode.Expiration
             };
             return Json(ret);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser([FromBody] string userId)
+        {
+            Console.WriteLine("called");
+            ApplicationUser appUser = await _userManager.FindByIdAsync(userId);
+            ApplicationUser loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
+            if (appUser == null)
+            {
+                //Add logging
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = $"There was an error finding the user with id: {userId}. Please try again."
+                };
+                return Json(errorMessage);
+            }
+
+            if (appUser.Equals(loggedInUser))
+            {
+                //log
+                //TODO: create class/struct for error and success messages
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = "You cannot delete yourself."
+                };
+                return Json(errorMessage);
+            }
+
+            var result = await _userManager.DeleteAsync(appUser);
+            if (!result.Succeeded)
+            {
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = "Failed to delete user. Please try again."
+                };
+            }
+
+            var successMessage = new
+            {
+                status = "success",
+                message = "User successfully deleted.",
+                url = Url.Action(nameof(Index))
+            };
+
+            return Json(successMessage);
         }
     }
 }

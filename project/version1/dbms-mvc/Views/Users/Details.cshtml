@@ -11,7 +11,7 @@ AppUserViewModel appUser = Model.AppUserViewModel;
     <h2 class="fw-bold">@appUser.Email</h2>
     <hr />
 </div>
-<div>
+<div id="roleButtonSection">
     @foreach(string role in Model.AllRoles){
         @if(appUser.Roles.Contains(role)) {
             <div id="@role" class="removeRoleButton roleButton btn btn-danger" >Remove role: @role</div>
@@ -19,9 +19,10 @@ AppUserViewModel appUser = Model.AppUserViewModel;
             <div id="@role" class="addRoleButton roleButton btn btn-primary" >Add role: @role</div>
         }
     }
-    <br>
-    <a asp-action="Index">Back to List</a>
 </div>
+<div id="deleteUserButton" class="btn btn-danger">Delete user</div>
+<br>
+<a asp-action="Index">Back to List</a>
 
 <p>User Id: @appUser.Id</p>
 
@@ -30,6 +31,8 @@ AppUserViewModel appUser = Model.AppUserViewModel;
         const userId = "@appUser.Id";
 
         const baseUrl = "/Users";
+
+	const deleteUrl = baseUrl + "/DeleteUser";
 
         function updateButtonClass(id) {
             const button = $(`#${id}`);
@@ -42,7 +45,7 @@ AppUserViewModel appUser = Model.AppUserViewModel;
             button.toggleClass(["removeRoleButton", "addRoleButton"])
         }
 
-        function sendRequest(url, event) {
+        function sendRoleChangeRequest(url, event) {
             const buttonId = event.target.id;
             const UserRoleDataInputModel = {
                 Id: userId,
@@ -68,13 +71,35 @@ AppUserViewModel appUser = Model.AppUserViewModel;
             });
         }
 
+	function sendDeleteRequest(url) {
+	    $.ajax({
+		type: "DELETE",
+		url: url,
+		contentType: "application/json",
+		dataType: "json",
+		data: JSON.stringify(userId),
+		success: function(response) {
+		    if(response.status === "success") {
+			window.location.href = response.url;
+		    } else {
+			alert(`error: ${response.message}`);
+		    }
+		},
+		error: function(xhr, textStatus, errorThrown) {
+		    console.log("error sending delete request.");
+		}
+	    });
+	}
+
         $(document).ready(function() {
             $(".roleButton").click(function(event) {
                 var button = $(`#${event.target.id}`);
                 const url = button.hasClass("addRoleButton") ? baseUrl + "/AddRoleToUser" : baseUrl + "/RemoveRoleFromUser";
-                sendRequest(url, event);
+                sendRoleChangeRequest(url, event);
             });
-
+	    $("#deleteUserButton").click(function() {
+		sendDeleteRequest(deleteUrl);
+	    });
         });
     </script>
 }
