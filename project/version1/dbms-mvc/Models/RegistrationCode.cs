@@ -11,7 +11,7 @@ public class RegistrationCode
 
     public RegistrationCode()
     {
-        Token = new Guid();
+        Token = Guid.NewGuid();
         //TODO: Do something with this Expiration
         Expiration = DateTime.Now.AddDays(3);
     }
