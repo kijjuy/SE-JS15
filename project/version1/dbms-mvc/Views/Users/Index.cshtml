@@ -64,7 +64,7 @@
 		url: url,
 		contentType: "application/json",
 		success: function(response) {
-		    console.log("success");
+		    alert(`User registration token is:\n\n${response.token}`);
 		},
 		error: function(xhr, textStatus, errorThrown) {
 		    console.log("error");
