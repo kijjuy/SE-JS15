@@ -20,25 +20,10 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts
-        public async Task<IActionResult> Index(string searchString)
+        public async Task<IActionResult> Index(Contact? searchContact)
         {
             var contacts = from m in _context.contacts
                            select m;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                var lowerCaseSearchString = searchString.ToLower();
-                contacts = contacts.Where(s => s.FirstName.ToLower().Contains(lowerCaseSearchString)
-                                            || s.LastName.ToLower().Contains(lowerCaseSearchString)
-                                            || s.Email.ToLower().Contains(lowerCaseSearchString)
-                                            || s.Organization.ToLower().Contains(lowerCaseSearchString)
-                                            || s.Title.ToLower().Contains(lowerCaseSearchString)
-                                            || s.StreetAddress1.ToLower().Contains(lowerCaseSearchString)
-                                            || s.City.ToLower().Contains(lowerCaseSearchString)
-                                            || s.Province.ToLower().Contains(lowerCaseSearchString)
-                                            || s.PostalCode.ToLower().Contains(lowerCaseSearchString)
-                                            || s.Phone.ToLower().Contains(lowerCaseSearchString));
-            }
 
             return View(await contacts.ToListAsync());
         }
