@@ -165,8 +165,14 @@ namespace dbms_mvc.Controllers
 
             //delete user here
 
-            Console.WriteLine(appUser.Id);
-            return RedirectToAction(nameof(Index));
+            var successMessage = new
+            {
+                status = "success",
+                message = "User successfully deleted.",
+                url = Url.Action(nameof(Index))
+            };
+
+            return Json(successMessage);
         }
     }
 }
