@@ -83,7 +83,10 @@ namespace dbms_mvc.Controllers
                 }
 
                 var dbPropValue = prop.GetValue(dbContact);
-                if (dbPropValue == null || !searchPropValue.Equals(dbPropValue))
+                string dbValStr = dbPropValue.ToString().ToLower();
+                string searchValStr = searchPropValue.ToString().ToLower();
+                bool dbValContainsSearchVal = dbValStr.Contains(searchValStr);
+                if (dbPropValue == null || !dbValContainsSearchVal)
                 {
                     isMatch = false;
                     break;
