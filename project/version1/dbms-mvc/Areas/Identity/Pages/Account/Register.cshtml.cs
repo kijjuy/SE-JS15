@@ -116,8 +116,21 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
         private bool IsValidRegistrationToken(string registrationTokenString)
         {
             Guid regToken = Guid.Parse(registrationTokenString);
-            bool isValid = _context.registrationCodes.Any(rc => rc.Token.Equals(regToken) && rc.Expiration > DateTime.Now);
-            return isValid;
+            RegistrationCode registrationCode = _context.registrationCodes.Where(rc => rc.Token.Equals(regToken)).FirstOrDefault();
+
+            if (registrationCode == null)
+            {
+                return false;
+            }
+
+            if (registrationCode.Token.Equals(regToken) && registrationCode.Expiration > DateTime.Now)
+            {
+                _context.registrationCodes.Remove(registrationCode);
+                _context.SaveChanges();
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
