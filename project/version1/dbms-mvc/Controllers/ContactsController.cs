@@ -6,6 +6,7 @@ using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
 using System.IO;
+using System.Reflection;
 
 namespace dbms_mvc.Controllers
 {
@@ -22,10 +23,73 @@ namespace dbms_mvc.Controllers
         // GET: Contacts
         public async Task<IActionResult> Index(Contact? searchContact)
         {
-            var contacts = from m in _context.contacts
-                           select m;
+            List<Contact> contacts = await _context.contacts.ToListAsync();
+            if (searchContact == null)
+            {
+                return View(contacts);
+            }
+            var props = typeof(Contact).GetProperties().ToList();
+            props = props.Where(p => p.Name != "ContactId").ToList();
 
-            return View(await contacts.ToListAsync());
+            contacts = GetMatchingContacts(searchContact, contacts, props).ToList();
+            SetSearchViewData(searchContact, props);
+            return View(contacts);
+        }
+
+        private void SetSearchViewData(Contact searchContact, IEnumerable<PropertyInfo> props)
+        {
+            foreach (var prop in props)
+            {
+                var propValue = prop.GetValue(searchContact);
+                if (propValue == null)
+                {
+                    ViewData[prop.Name] = "";
+                    continue;
+                }
+                Console.WriteLine($"Adding prop value with value={propValue}");
+                ViewData["prop-" + prop.Name] = propValue.ToString();
+            }
+        }
+
+        private IEnumerable<Contact> GetMatchingContacts(Contact searchContact, IEnumerable<Contact> contacts, IEnumerable<PropertyInfo> props)
+        {
+            List<Contact> matchingContacts = new List<Contact>();
+            //TODO: maybe make async using mutex or other concurrency method
+            foreach (Contact contact in contacts)
+            {
+                bool isMatch = CheckContactMatch(searchContact, contact, props);
+                if (isMatch)
+                {
+                    matchingContacts.Add(contact);
+                }
+            }
+            return matchingContacts;
+        }
+
+        private bool CheckContactMatch(Contact searchContact, Contact dbContact, IEnumerable<PropertyInfo> props)
+        {
+            bool isMatch = true;
+            foreach (var prop in props)
+            {
+                if (!isMatch)
+                {
+                    break;
+                }
+
+                var searchPropValue = prop.GetValue(searchContact);
+                if (searchPropValue == null)
+                {
+                    continue;
+                }
+
+                var dbPropValue = prop.GetValue(dbContact);
+                if (dbPropValue == null || !searchPropValue.Equals(dbPropValue))
+                {
+                    isMatch = false;
+                    break;
+                }
+            }
+            return isMatch;
         }
 
         // GET: Contacts/Details/5
