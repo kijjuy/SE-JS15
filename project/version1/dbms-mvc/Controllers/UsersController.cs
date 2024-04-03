@@ -10,8 +10,8 @@ namespace dbms_mvc.Controllers
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private UserManager<ApplicationUser> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public UsersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
                 RoleManager<IdentityRole> roleManager)
