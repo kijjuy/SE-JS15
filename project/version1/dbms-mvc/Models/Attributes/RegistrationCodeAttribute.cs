@@ -1,20 +1,21 @@
 using System.ComponentModel.DataAnnotations;
+using dbms_mvc.Data;
 
-public class RegistrationCodeAttribute : ValidationAttribute
+public class RegistrationTokenAttribute : ValidationAttribute
 {
     private readonly int _length = 8;
 
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
-        string stringVal = value as string;
-        if (stringVal == null)
+        string regTokenStr = value as string;
+        if (regTokenStr == null)
         {
-            return new ValidationResult("Value is not a string.");
+            return new ValidationResult("Registration Token must be a string.");
         }
 
-        if (stringVal != "asdf")
+        if (regTokenStr.Length != new Guid().ToString().Length)
         {
-            return new ValidationResult($"{stringVal} is not a valid registration code.");
+            return new ValidationResult($"{regTokenStr} is not a valid registration code.");
         }
 
         return ValidationResult.Success;
