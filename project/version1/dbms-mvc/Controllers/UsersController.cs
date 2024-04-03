@@ -76,9 +76,11 @@ namespace dbms_mvc.Controllers
             string id = roleData.Id;
             string role = roleData.Role;
             ApplicationUser appUser = await _userManager.FindByIdAsync(id);
+            ApplicationUser loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             if (appUser == null)
             {
-                //todo: log error
+                _logger.LogError($"Error finding with id: {appUser.Id} when trying to add role.");
+
                 var returnErrorMessage = new
                 {
                     status = "error",
@@ -86,6 +88,17 @@ namespace dbms_mvc.Controllers
                 };
                 Console.WriteLine($"Id of user: {id}");
                 return Json(returnErrorMessage);
+            }
+
+            if (appUser.Equals(loggedInUser))
+            {
+                _logger.LogWarning($"User with id: {loggedInUser.Id} tried to add their own role.");
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = "You cannot modify your own roles."
+                };
+                return Json(errorMessage);
             }
             await _userManager.AddToRoleAsync(appUser, role);
             var returnSuccessMessage = new
@@ -102,9 +115,10 @@ namespace dbms_mvc.Controllers
             string id = roleData.Id;
             string role = roleData.Role;
             ApplicationUser appUser = await _userManager.FindByIdAsync(id);
+            ApplicationUser loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             if (appUser == null)
             {
-                //todo: log error
+                _logger.LogError($"Could not find user with id: {id} while trying to remove role.");
                 var returnErrorMessage = new
                 {
                     status = "error",
@@ -112,6 +126,18 @@ namespace dbms_mvc.Controllers
                 };
                 return Json(returnErrorMessage);
             }
+
+            if (appUser.Equals(loggedInUser))
+            {
+                _logger.LogWarning($"User with id: {loggedInUser.Id} tried to remove their own role.");
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = "You cannot modify your own roles."
+                };
+                return Json(errorMessage);
+            }
+
             await _userManager.RemoveFromRoleAsync(appUser, role);
             var returnSuccessMessage = new
             {
