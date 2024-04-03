@@ -32,7 +32,7 @@
 		    @foreach(var prop in props)
 		    {
 			<td>
-			    <input name="@prop.Name" type="text">
+			    <input name="@prop.Name" type="text" value='@ViewData["prop-" + prop.Name]'>
 			</td>
 		    }
 		</form>
