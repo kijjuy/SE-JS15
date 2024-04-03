@@ -113,10 +113,20 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        private bool IsValidRegistrationToken(string registrationTokenString)
+        private RegistrationCode GetRegistrationCodeFromString(string registrationTokenString)
         {
             Guid regToken = Guid.Parse(registrationTokenString);
             RegistrationCode registrationCode = _context.registrationCodes.Where(rc => rc.Token.Equals(regToken)).FirstOrDefault();
+            if (registrationCode == null)
+            {
+                _logger.LogWarning("A user is attempting to register with an invalid registration token.");
+            }
+            return registrationCode;
+
+        }
+
+        private bool IsValidRegistrationToken(RegistrationCode registrationCode)
+        {
 
             if (registrationCode == null)
             {
