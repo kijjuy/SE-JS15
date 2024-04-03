@@ -138,9 +138,13 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid && IsValidRegistrationToken(Input.RegistrationToken))
+            if (ModelState.IsValid)
             {
-
+                bool isValidToken = IsValidRegistrationToken(Input.RegistrationToken);
+                if (!isValidToken)
+                {
+                    ModelState.AddModelError(string.Empty, "This is not a valid registration token.");
+                }
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
