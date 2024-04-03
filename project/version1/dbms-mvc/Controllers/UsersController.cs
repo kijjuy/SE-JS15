@@ -135,21 +135,37 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteUser([FromBody] ModifyRoleViewModel viewModel)
-        //TODO: change name of ModifyRoleViewModel to be more general
+        public async Task<IActionResult> DeleteUser([FromBody] string userId)
         {
-            string appUserId = viewModel.AppUserViewModel.Id;
-            ApplicationUser appUser = await _userManager.FindByIdAsync(appUserId);
+            Console.WriteLine("called");
+            ApplicationUser appUser = await _userManager.FindByIdAsync(userId);
+            ApplicationUser loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             if (appUser == null)
             {
+                //Add logging
                 var errorMessage = new
                 {
                     status = "error",
-                    message = $"There was an error finding the user with id: {appUserId}. Please try again."
+                    message = $"There was an error finding the user with id: {userId}. Please try again."
                 };
                 return Json(errorMessage);
             }
-            //May have to return json here and have javascript redirect
+
+            if (appUser.Equals(loggedInUser))
+            {
+                //log
+                //TODO: create class/struct for error and success messages
+                var errorMessage = new
+                {
+                    status = "error",
+                    message = "You cannot delete yourself."
+                };
+                return Json(errorMessage);
+            }
+
+            //delete user here
+
+            Console.WriteLine(appUser.Id);
             return RedirectToAction(nameof(Index));
         }
     }
