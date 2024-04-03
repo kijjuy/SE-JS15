@@ -123,7 +123,14 @@ namespace dbms_mvc.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRegistrationCode()
         {
-            var ret = new { };
+            RegistrationCode registrationCode = new RegistrationCode();
+            await _context.registrationCodes.AddAsync(registrationCode);
+            await _context.SaveChangesAsync();
+            var ret = new
+            {
+                registrationCode.Token,
+                registrationCode.Expiration
+            };
             return Json(ret);
         }
     }
