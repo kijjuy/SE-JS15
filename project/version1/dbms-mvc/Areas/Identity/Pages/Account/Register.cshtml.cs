@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using dbms_mvc.Models;
+using dbms_mvc.Data;
 
 namespace dbms_mvc.Areas.Identity.Pages.Account
 {
@@ -28,19 +29,19 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
-        private readonly ILogger<RegisterModel> _logger;
+        private readonly ApplicationDbContext _context;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger)
+        ApplicationDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
-            _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -70,8 +71,8 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
         {
             [Required]
             [Display(Name = "Registration Code")]
-            [RegistrationCode]
-            public string RegistrationCode { get; set; }
+            [RegistrationToken]
+            public string RegistrationToken { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -109,21 +110,25 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        private bool IsValidRegistrationToken(string registrationTokenString)
+        {
+            Guid regToken = Guid.Parse(registrationTokenString);
+            bool isValid = _context.registrationCodes.Any(rc => rc.Token.Equals(regToken) && rc.Expiration > DateTime.Now);
+            return isValid;
+        }
+
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && IsValidRegistrationToken(Input.RegistrationToken))
             {
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
-
-
-                Console.WriteLine("asdf");
-                Console.Beep();
 
                 if (result.Succeeded)
                 {
