@@ -113,35 +113,26 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        private RegistrationCode GetRegistrationCodeFromString(string registrationTokenString)
+        /// <summary>
+        ///	returns the matching registration code from the database or throws an exception if 
+        ///	it does not exist.
+        /// </summary>
+        private bool TryGetRegistrationCode(string registrationTokenString, out RegistrationCode regCode)
         {
-            Guid regToken = Guid.Parse(registrationTokenString);
-            RegistrationCode registrationCode = _context.registrationCodes.Where(rc => rc.Token.Equals(regToken)).FirstOrDefault();
-            if (registrationCode == null)
-            {
-                _logger.LogWarning("A user is attempting to register with an invalid registration token.");
-            }
-            return registrationCode;
-
-        }
-
-        private bool IsValidRegistrationToken(RegistrationCode registrationCode)
-        {
-
-            if (registrationCode == null)
+            Guid token = Guid.Parse(registrationTokenString);
+            regCode = _context.registrationCodes.Where(rc => rc.Token == token).FirstOrDefault();
+            if (regCode == null || regCode.Expiration < DateTime.Now)
             {
                 return false;
             }
+            return true;
+        }
 
-            if (registrationCode.Token.Equals(regToken) && registrationCode.Expiration > DateTime.Now)
-            {
-                _context.registrationCodes.Remove(registrationCode);
-                _context.SaveChanges();
-                _logger.LogInformation("Valid registration token consumed.");
-                return true;
-            }
-
-            return false;
+        private void ConsumeRegistrationCode(RegistrationCode regCode)
+        {
+            _context.registrationCodes.Remove(regCode);
+            _context.SaveChanges();
+            _logger.LogInformation($"Registration code with token: {regCode.Token} has been used.");
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -150,7 +141,7 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                bool isValidToken = IsValidRegistrationToken(Input.RegistrationToken);
+                bool isValidToken = TryGetRegistrationCode(Input.RegistrationToken, out RegistrationCode registrationCode);
                 if (!isValidToken)
                 {
                     ModelState.AddModelError(string.Empty, "This is not a valid registration token.");
@@ -164,6 +155,7 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    ConsumeRegistrationCode(registrationCode);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
