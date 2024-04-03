@@ -127,6 +127,7 @@ namespace dbms_mvc.Areas.Identity.Pages.Account
             {
                 _context.registrationCodes.Remove(registrationCode);
                 _context.SaveChanges();
+                _logger.LogInformation("Valid registration token consumed.");
                 return true;
             }
 
