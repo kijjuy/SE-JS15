@@ -79,7 +79,11 @@ AppUserViewModel appUser = Model.AppUserViewModel;
 		dataType: "json",
 		data: JSON.stringify(userId),
 		success: function(response) {
-		    console.log("success");
+		    if(response.status === "success") {
+			window.location.href = response.url;
+		    } else {
+			alert(`error: ${response.message}`);
+		    }
 		},
 		error: function(xhr, textStatus, errorThrown) {
 		    console.log("error sending delete request.");
