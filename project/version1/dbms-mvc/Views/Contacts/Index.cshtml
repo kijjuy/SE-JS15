@@ -16,15 +16,6 @@
     </style>
 
     <h1>Index</h1>
-    @using (Html.BeginForm("Index", "Contacts", FormMethod.Get))
-    {
-    <div class="search-box">
-        <label for="searchString">Find by name or email:</label>
-        @Html.TextBox("searchString", null, new { @class = "form-control", @placeholder = "Search..." })
-        <button type="submit" class="btn btn-primary mt-2">Search</button>
-    </div>
-    }
-
 
     <a asp-action="Create" class="btn btn-success">Create New</a>
 
