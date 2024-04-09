@@ -248,12 +248,8 @@ namespace dbms_mvc.Controllers
 
                 if (dupeContact != null)
                 {
-                    Console.WriteLine("Adding Merge conflict");
                     string message = "There is already a contact with that name.";
                     unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                }
-                else if (newContact != null && dupeContact == null)
-                {
                     Console.WriteLine("------------------ Adding new contact ------------------");
                     _context.contacts.Add(newContact);
                 }
