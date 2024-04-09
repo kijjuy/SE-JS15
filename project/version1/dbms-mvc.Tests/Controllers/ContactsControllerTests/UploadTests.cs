@@ -29,7 +29,7 @@ public class ContactController_UploadTests
     }
 
     [TestMethod]
-    public async Task GetDupeContacts_NotMatch_ReturnsEmptyList(Contact contact)
+    public async Task GetDupeContacts_NotMatch_ReturnsEmptyList()
     {
         //Arrange
 
