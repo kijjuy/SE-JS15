@@ -51,7 +51,7 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        private IEnumerable<Contact> GetMatchingContacts(Contact searchContact, IEnumerable<Contact> contacts, IEnumerable<PropertyInfo> props)
+        public IEnumerable<Contact> GetMatchingContacts(Contact searchContact, IEnumerable<Contact> contacts, IEnumerable<PropertyInfo> props)
         {
             List<Contact> matchingContacts = new List<Contact>();
             //TODO: maybe make async using mutex or other concurrency method
