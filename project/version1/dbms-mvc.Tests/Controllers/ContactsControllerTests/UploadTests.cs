@@ -46,6 +46,7 @@ public class ContactController_UploadTests
         var firstThreeContacts = _context.contacts.Take(3).ToList();
         foreach (var contact in firstThreeContacts)
         {
+            contact.ContactId = 0;
             contact.Email = "Not Exact Match";
         }
 
@@ -63,6 +64,10 @@ public class ContactController_UploadTests
     {
         //Arrange
         var firstThreeContacts = _context.contacts.Take(3).ToList();
+        foreach (var contact in firstThreeContacts)
+        {
+            contact.ContactId = 0;
+        }
         var controller = new ContactsController(_context);
 
         //Act
