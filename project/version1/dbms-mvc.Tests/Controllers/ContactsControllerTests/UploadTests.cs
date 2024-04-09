@@ -4,7 +4,7 @@ using AutoFixture;
 using dbms_mvc.Controllers;
 using dbms_mvc.Models;
 using dbms_mvc.Data;
-namespace dbms_mvc.Tests;
+namespace dbms_mvc.Tests.Controllers;
 
 [TestClass]
 public class ContactController_UploadTests
