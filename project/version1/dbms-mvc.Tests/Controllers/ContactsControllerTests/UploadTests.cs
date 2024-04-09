@@ -25,7 +25,10 @@ public class ContactController_UploadTests
     {
         //Arrange
 
-        var newContactInList = _fixture.CreateMany<Contact>().ToList();
+        var newContact = _fixture.Create<Contact>();
+
+        var newContactInList = new List<Contact>();
+        newContactInList.Add(newContact);
 
         var controller = new ContactsController(_context);
 
