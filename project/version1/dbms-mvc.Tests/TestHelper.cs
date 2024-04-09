@@ -6,7 +6,7 @@ namespace dbms_mvc.Tests.Helper;
 
 public class TestHelper
 {
-    private ApplicationDbContext CreateAppDbContext()
+    private static ApplicationDbContext CreateAppDbContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(databaseName: "testDb")
@@ -14,13 +14,13 @@ public class TestHelper
         return new ApplicationDbContext(options);
     }
 
-    private Fixture CreateFixture()
+    private static Fixture CreateFixture()
     {
         return new Fixture();
     }
 
 
-    public async Task<ApplicationDbContext> GenerateContactsContext()
+    public static async Task<ApplicationDbContext> GenerateContactsContext()
     {
         var context = CreateAppDbContext();
         var fixture = CreateFixture();
