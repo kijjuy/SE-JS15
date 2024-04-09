@@ -15,7 +15,6 @@ public class ContactController_UploadTests
     [ClassInitialize]
     public static async Task Setup(TestContext testContext)
     {
-
         _fixture = new Fixture();
 
         _context = await TestHelper.GenerateContactsContext();
