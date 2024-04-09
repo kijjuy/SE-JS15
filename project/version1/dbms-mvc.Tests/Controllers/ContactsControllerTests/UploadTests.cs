@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using AutoFixture;
 using dbms_mvc.Controllers;
 using dbms_mvc.Models;
 using dbms_mvc.Data;
+using dbms_mvc.Tests.Helper;
 namespace dbms_mvc.Tests.Controllers;
 
 [TestClass]
@@ -15,16 +15,10 @@ public class ContactController_UploadTests
     [ClassInitialize]
     public static async Task Setup(TestContext testContext)
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-        .UseInMemoryDatabase(databaseName: "testDb")
-    .Options;
-        _context = new ApplicationDbContext(options);
 
         _fixture = new Fixture();
 
-        var contactList = _fixture.CreateMany<Contact>(50).ToList();
-        await _context.AddRangeAsync(contactList);
-        await _context.SaveChangesAsync();
+        _context = await TestHelper.GenerateContactsContext();
     }
 
     [TestMethod]
