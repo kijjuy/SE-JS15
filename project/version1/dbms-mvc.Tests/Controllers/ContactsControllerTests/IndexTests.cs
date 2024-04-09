@@ -33,4 +33,41 @@ public class ContactsController_IndexTests
 
         Assert.IsInstanceOfType(result, typeof(IActionResult));
     }
+
+    [TestMethod]
+    public async Task Index_MatchingContact_ReturnsView()
+    {
+        //Arrange
+        Contact matchingContact = _context.contacts.FirstOrDefault();
+
+        var controller = new ContactsController(_context);
+
+        //Act
+        var result = await controller.Index(matchingContact);
+
+        //Assert
+        Assert.IsInstanceOfType(result, typeof(IActionResult));
+    }
+
+    [TestMethod]
+    public void GetMatchingContacts_NotMatch_ReturnsEmptyList()
+    {
+        //Arrange
+        Contact nonMatchingContact = new Contact
+        {
+            FirstName = Guid.NewGuid().ToString()
+        };
+
+        var allContacts = _context.contacts.ToList();
+
+        var props = typeof(Contact).GetProperties();
+
+        var controller = new ContactsController(_context);
+
+        //Act
+        var result = controller.GetMatchingContacts(nonMatchingContact, allContacts, props);
+
+        //Assert
+        Assert.AreEqual(result.Count(), 0);
+    }
 }
