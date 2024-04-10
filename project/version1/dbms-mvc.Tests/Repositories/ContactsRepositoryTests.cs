@@ -85,6 +85,23 @@ public class ContactsRepositoryTests
         }
     }
 
+    [TestMethod]
+    public async Task DeleteContact()
+    {
+        //Arrange
+        CreateRepoAndContact(out IContactsRepository repository, out Contact testContact);
+
+        await _context.AddAsync(testContact);
+        await _context.SaveChangesAsync();
+        Assert.AreEqual(_context.contacts.Count(), 1, "Error in Act section: Contact not added properly");
+
+        //Act
+        await repository.DeleteContact(testContact);
+
+        //Assert
+        Assert.AreEqual(_context.contacts.Count(), 0);
+    }
+
     private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
     {
         repository = new ContactsRepository(_context);
