@@ -152,9 +152,30 @@ public class ContactsRepository : IContactsRepository, IDisposable
     }
 
     //Multi-Use
+
+    /// <summary>
+    /// Returns a contact based on its ID.
+    /// </summary>
+    /// <param name="id">id of the contact to find.</param>
+    /// <returns>Contact found by <paramref name="id"/> or <see langword="null"/>.</returns>
     public async Task<Contact?> GetContactById(int? id)
     {
         return await _context.contacts.FirstOrDefaultAsync(m => m.ContactId == id);
+    }
+
+    /// <summary>
+    /// Adds a contact to the context and saves the changes.
+    /// </summary>
+    /// <param name="contact">The contact to add to the database</param>
+    /// <exception cref="ArgumentNullException">Thrown when null <paramref name="contact"/> is passed.</exception>
+    public async Task AddContact(Contact contact)
+    {
+        if (contact == null)
+        {
+            throw new ArgumentNullException("ContactsRepository.AddContact must be passed a non-null value");
+        }
+        await _context.contacts.AddAsync(contact);
+        await _context.SaveChangesAsync();
     }
 
     //IDisposable Section

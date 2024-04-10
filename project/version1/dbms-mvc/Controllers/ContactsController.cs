@@ -84,8 +84,7 @@ namespace dbms_mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(contact);
-                await _context.SaveChangesAsync();
+                await _repository.AddContact(contact);
                 return RedirectToAction(nameof(Index));
             }
             return View();
