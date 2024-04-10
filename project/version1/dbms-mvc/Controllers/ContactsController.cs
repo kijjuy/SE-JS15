@@ -124,8 +124,7 @@ namespace dbms_mvc.Controllers
             {
                 try
                 {
-                    _context.Update(contact);
-                    await _context.SaveChangesAsync();
+                    await _repository.UpdateContact(contact);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
