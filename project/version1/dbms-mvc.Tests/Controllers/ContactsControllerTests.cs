@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using AutoFixture;
 using dbms_mvc.Controllers;
 using dbms_mvc.Models;
@@ -22,5 +23,26 @@ public class ContactsControllerTests
 
         _fixture = new Fixture();
         _repository = new ContactsRepository(contact);
+    }
+
+    [TestMethod]
+    public async Task Index()
+    {
+        //Arrange
+        var controller = new ContactsController(_repository);
+
+        Contact nullContact = null;
+        Contact emptyContact = new Contact();
+        Contact withDataContact = _fixture.Create<Contact>();
+
+        //Act
+        var result_null_view = await controller.Index(nullContact);
+        var result_emptyContact_view = await controller.Index(emptyContact);
+        var result_withDataContact_view = await controller.Index(withDataContact);
+
+        //Assert
+        Assert.IsInstanceOfType<ViewResult>(result_null_view);
+        Assert.IsInstanceOfType<ViewResult>(result_emptyContact_view);
+        Assert.IsInstanceOfType<ViewResult>(result_withDataContact_view);
     }
 }
