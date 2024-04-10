@@ -146,13 +146,7 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "delete, admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var contact = await _context.contacts
-                .FirstOrDefaultAsync(m => m.ContactId == id);
+            var contact = await _repository.GetContactById(id);
             if (contact == null)
             {
                 return NotFound();
