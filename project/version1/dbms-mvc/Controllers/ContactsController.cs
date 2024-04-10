@@ -171,7 +171,7 @@ namespace dbms_mvc.Controllers
         }
 
         [Authorize(Roles = "upload, admin")]
-        public async Task<IActionResult> Upload()
+        public IActionResult Upload()
         {
             return View();
         }
