@@ -26,7 +26,7 @@ public class ContactsRepositoryTests
     public async Task AddContact()
     {
         //Arrange
-        CreateRepoAndContat(out var repository, out var testContact);
+        CreateRepoAndContact(out var repository, out var testContact);
 
         //Act
         await repository.AddContact(testContact);
@@ -41,7 +41,7 @@ public class ContactsRepositoryTests
     public async Task GetContactById()
     {
         //Arrange
-        CreateRepoAndContat(out IContactsRepository repository, out Contact testContact);
+        CreateRepoAndContact(out IContactsRepository repository, out Contact testContact);
 
         _context.contacts.Add(testContact);
         await _context.SaveChangesAsync();
@@ -54,7 +54,7 @@ public class ContactsRepositoryTests
         Assert.AreEqual(_context.contacts.Count(), 1);
     }
 
-    private void CreateRepoAndContat(out IContactsRepository repository, out Contact contact)
+    private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
     {
         repository = new ContactsRepository(_context);
         contact = _fixture.Create<Contact>();
