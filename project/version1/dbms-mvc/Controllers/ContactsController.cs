@@ -195,19 +195,15 @@ namespace dbms_mvc.Controllers
         {
             foreach (var inputModel in replaceInputModels)
             {
-                await _context.AddAsync(inputModel.NewContact);
-                Console.WriteLine($"--------------------  Added contact with name: {inputModel.NewContact.FirstName} {inputModel.NewContact.LastName}");
-                var contact = await _context.contacts.FindAsync(inputModel.ReplaceContactId);
-                Console.WriteLine($"Removed contact with id: {inputModel.ReplaceContactId}");
-                _context.contacts.Remove(contact);
+                await _repository.AddContact(inputModel.NewContact);
+
+                var removeContact = await _repository.GetContactById(inputModel.ReplaceContactId);
+
+                _repository.DeleteContact(removeContact);
             }
-            await _context.SaveChangesAsync();
+
             return Ok();
         }
-
-
-
-
 
         // Main function that handles logic
         private List<Contact> GetFormData(IFormFile file)
