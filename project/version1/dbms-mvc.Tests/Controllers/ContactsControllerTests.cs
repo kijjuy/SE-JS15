@@ -45,4 +45,26 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<ViewResult>(result_emptyContact_view);
         Assert.IsInstanceOfType<ViewResult>(result_withDataContact_view);
     }
+
+    [TestMethod]
+    public async Task Details()
+    {
+        //Arrange
+        var controller = new ContactsController(_repository);
+        Contact dbContact = _fixture.Create<Contact>();
+
+        await _repository.AddContact(dbContact);
+
+        int id = dbContact.ContactId;
+
+        //Act
+        var result_nullId_notFound = await controller.Details(null);
+        var result_noMatch_notFound = await controller.Details(id + 1);
+        var result_match_view = await controller.Details(id);
+
+        //Assert
+        Assert.IsInstanceOfType<NotFoundResult>(result_nullId_notFound);
+        Assert.IsInstanceOfType<NotFoundResult>(result_noMatch_notFound);
+        Assert.IsInstanceOfType<ViewResult>(result_match_view);
+    }
 }
