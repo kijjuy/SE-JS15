@@ -53,4 +53,10 @@ public class ContactsRepositoryTests
         Assert.AreEqual(testContact, result);
         Assert.AreEqual(_context.contacts.Count(), 1);
     }
+
+    private void CreateRepoAndContat(out IContactsRepository repository, out Contact contact)
+    {
+        repository = new ContactsRepository(_context);
+        contact = _fixture.Create<Contact>();
+    }
 }
