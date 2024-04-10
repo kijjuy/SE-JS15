@@ -12,4 +12,5 @@ public interface IContactsRepository : IDisposable
     public Task AddContact(Contact contact);
     public Task UpdateContact(Contact contact);
     public Task DeleteContact(Contact contact);
+    public bool ContactExists(int id);
 }
