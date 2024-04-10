@@ -45,16 +45,23 @@ public class ContactController_UploadTests
     {
         //Arrange
         var firstThreeContacts = _context.contacts.Take(3).ToList();
+        var contactList = new List<Contact>();
         foreach (var contact in firstThreeContacts)
         {
-            contact.ContactId = 0;
-            contact.Email = "Not Exact Match";
+            contactList.Add(
+            new Contact
+            {
+                FirstName = contact.FirstName,
+                LastName = contact.LastName,
+                Organization = contact.Organization
+            }
+                );
         }
 
         var controller = new ContactsController(_context);
 
         //Act
-        var result = await controller.GetDupeContacts(firstThreeContacts);
+        var result = await controller.GetDupeContacts(contactList);
 
         //Assert
         Assert.IsTrue(result.Count == 3, "Not all contacts matched that should have.");
@@ -65,14 +72,22 @@ public class ContactController_UploadTests
     {
         //Arrange
         var firstThreeContacts = _context.contacts.Take(3).ToList();
+        var contactList = new List<Contact>();
         foreach (var contact in firstThreeContacts)
         {
-            contact.ContactId = 0;
+            contactList.Add(
+        new Contact
+        {
+            FirstName = contact.FirstName,
+            LastName = contact.LastName,
+            Organization = contact.Organization
+        }
+            );
         }
         var controller = new ContactsController(_context);
 
         //Act
-        var result = await controller.GetDupeContacts(firstThreeContacts);
+        var result = await controller.GetDupeContacts(contactList);
 
         //Assert
         Assert.IsTrue(result.Count == 0, "Exact duplicates are being matched when they should not be.");
