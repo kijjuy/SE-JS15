@@ -23,6 +23,7 @@ public class ContactsRepositoryTests
         _fixture = new Fixture();
     }
 
+    [TestMethod]
     public async Task AddContact()
     {
         //Arrange
