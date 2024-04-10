@@ -122,6 +122,35 @@ public class ContactsRepositoryTests
 
     }
 
+    [TestMethod]
+    public async Task SearchContacts()
+    {
+        //Arrange
+        CreateRepoAndContact(out IContactsRepository repository, out Contact testContact);
+        var dbContacts = _fixture.CreateMany<Contact>(50);
+
+        await _context.AddRangeAsync(dbContacts);
+        await _context.SaveChangesAsync();
+
+        Contact firstDbContact = dbContacts.FirstOrDefault();
+        Contact partialMatchContact = new Contact()
+        {
+            FirstName = firstDbContact.FirstName,
+            LastName = firstDbContact.LastName,
+            Organization = "Not the same"
+        };
+
+        //Act
+        var result_noMatch_emptyList = await repository.SearchContacts(testContact);
+        var result_partialMatch_oneItemList = await repository.SearchContacts(partialMatchContact);
+        var result_exactMatch_emptyList = await repository.SearchContacts(firstDbContact);
+
+        //Assert
+        Assert.AreEqual(result_noMatch_emptyList.Count(), 0);
+        Assert.AreEqual(result_partialMatch_oneItemList.Count(), 1);
+        Assert.AreEqual(result_exactMatch_emptyList.Count(), 0);
+    }
+
     private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
     {
         repository = new ContactsRepository(_context);
