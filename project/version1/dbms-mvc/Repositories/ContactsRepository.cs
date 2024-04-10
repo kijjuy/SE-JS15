@@ -154,7 +154,15 @@ public class ContactsRepository : IContactsRepository, IDisposable
 
     //Upload Section
 
-
+    /// <summary>
+    /// Takes a list of <paramref name="newContacts"/> not in the database and checks if
+    /// any of them match the <c>Contact.FirstName</c> and <c>Contact.LastName</c> of all contacts 
+    /// in the database.
+    /// </summary>
+    /// <param name="newContacts">IEnumerable of new contacts not yet in the database</param>
+    /// <returns>
+    /// IEnumerable of all contacts that invoked a merge conflict.
+    /// </returns>
     public async Task<IEnumerable<MergeConflictViewModel>> GetUploadMergeConflicts(IEnumerable<Contact> newContacts)
     {
         List<MergeConflictViewModel> unresolvedMerges = new List<MergeConflictViewModel>();
