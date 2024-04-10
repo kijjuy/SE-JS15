@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using dbms_mvc.Data;
+using dbms_mvc.Models;
 
 namespace dbms_mvc.Repositories;
 
@@ -149,6 +150,44 @@ public class ContactsRepository : IContactsRepository, IDisposable
             }
         }
         return isMatch;
+    }
+
+    //Upload Section
+
+
+    public async Task<IEnumerable<MergeConflictViewModel>> GetUploadMergeConflicts(IEnumerable<Contact> newContacts)
+    {
+        List<MergeConflictViewModel> unresolvedMerges = new List<MergeConflictViewModel>();
+
+        foreach (Contact newContact in newContacts)
+        {
+            if (newContact.FirstName == "")
+            {
+                continue;
+            }
+
+            Contact dupeContact = await CheckContactNamesMatch(newContact);
+
+            if (dupeContact != null)
+            {
+                string message = "There is already a contact with that name.";
+                unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
+                //Log Here
+            }
+            else
+            {
+                await this.AddContact(newContact);
+            }
+        }
+
+        return unresolvedMerges;
+    }
+
+    private async Task<Contact?> CheckContactNamesMatch(Contact newContact)
+    {
+        return await _context.contacts
+            .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
+            .FirstOrDefaultAsync();
     }
 
     //Multi-Use
