@@ -178,6 +178,16 @@ public class ContactsRepository : IContactsRepository, IDisposable
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Updates the contact in the database with the same <paramref name="contact"/>.ContactId
+    /// to new version of <paramref name="contact"/>.
+    /// </summary>
+    public async Task UpdateContact(Contact contact)
+    {
+        _context.Update(contact);
+        await _context.SaveChangesAsync();
+    }
+
     //IDisposable Section
 
     private bool disposed = false;

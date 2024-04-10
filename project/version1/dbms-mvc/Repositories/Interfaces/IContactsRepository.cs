@@ -7,4 +7,6 @@ public interface IContactsRepository : IDisposable
     public Task<Contact?> GetContactById(int? id);
 
     public Task AddContact(Contact contact);
+
+    public Task UpdateContact(Contact contact);
 }
