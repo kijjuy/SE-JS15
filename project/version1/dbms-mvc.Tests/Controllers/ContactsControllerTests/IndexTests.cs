@@ -14,10 +14,17 @@ public class ContactsController_IndexTests
 {
     private static ApplicationDbContext _context;
 
-    [ClassInitialize]
-    public static async Task Setup(TestContext testContext)
+    [TestInitialize]
+    public async Task Setup()
     {
         _context = await TestHelper.GenerateContactsContext();
+        Assert.IsTrue(_context.contacts.Count() > 0, "Failed to initialize class. Db was empty");
+    }
+
+    [TestCleanup]
+    public void Cleanup()
+    {
+        TestHelper.CleanupDatabase(_context);
     }
 
     [TestMethod]
