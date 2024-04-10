@@ -15,36 +15,37 @@ namespace dbms_mvc.Controllers
     public class ContactsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IContactsRepository _repository;
 
-        public ContactsController(ApplicationDbContext context)
+        public ContactsController(ApplicationDbContext context, IContactsRepository repository)
         {
             _context = context;
+            _repository = repository;
         }
 
         // GET: Contacts
         public async Task<IActionResult> Index(Contact? searchContact)
         {
-            List<Contact> contacts = await _context.contacts.ToListAsync();
-            if (searchContact == null)
-            {
-                return View(contacts);
-            }
-            var props = typeof(Contact).GetProperties().ToList();
-            props = props.Where(p => p.Name != "ContactId").ToList();
-
-            contacts = GetMatchingContacts(searchContact, contacts, props).ToList();
-            SetSearchViewData(searchContact, props);
+            var contacts = await _repository.SearchContacts(searchContact);
+            SetSearchViewData(searchContact);
             return View(contacts);
         }
 
-        private void SetSearchViewData(Contact searchContact, IEnumerable<PropertyInfo> props)
+        private void SetSearchViewData(Contact? searchContact)
         {
+            if (searchContact == null)
+            {
+                return;
+            }
+
+            var props = typeof(Contact).GetProperties().ToList();
+            props = props.Where(p => p.Name != "ContactId").ToList();
             foreach (var prop in props)
             {
                 var propValue = prop.GetValue(searchContact);
                 if (propValue == null)
                 {
-                    ViewData[prop.Name] = "";
+                    ViewData["prop-" + prop.Name] = "";
                     continue;
                 }
                 Console.WriteLine($"Adding prop value with value={propValue}");
