@@ -69,7 +69,7 @@ namespace dbms_mvc.Controllers
 
         // GET: Contacts/Create
         [Authorize(Roles = "create, admin")]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             return View(new Contact());
         }
