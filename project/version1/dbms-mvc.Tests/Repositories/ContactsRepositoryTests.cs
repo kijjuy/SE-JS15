@@ -40,5 +40,17 @@ public class ContactsRepositoryTests
     [TestMethod]
     public async Task GetContactById()
     {
+        //Arrange
+        CreateRepoAndContat(out IContactsRepository repository, out Contact testContact);
+
+        _context.contacts.Add(testContact);
+        await _context.SaveChangesAsync();
+
+        //Act
+        Contact result = await repository.GetContactById(testContact.ContactId);
+
+        //Assert
+        Assert.AreEqual(testContact, result);
+        Assert.AreEqual(_context.contacts.Count(), 1);
     }
 }
