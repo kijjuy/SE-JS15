@@ -184,7 +184,7 @@ public class ContactsRepositoryTests
         var result_exactMatch_emptyList = await repository.GetUploadMergeConflicts(firstDbContactInEnum);
 
         //Assert
-        Assert.AreEqual(_context.contacts.Count(), noMatchContacts.Count() + dbContacts.Count());
+        Assert.AreEqual(noMatchContacts.Count() + dbContacts.Count(), _context.contacts.Count());
         Assert.AreEqual(0, result_noMatch_emptyList.Count());
         Assert.AreEqual(1, result_partialMatch_oneItemList.Count());
         Assert.AreEqual(0, result_exactMatch_emptyList.Count());
