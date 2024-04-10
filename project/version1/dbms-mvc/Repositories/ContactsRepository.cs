@@ -237,6 +237,12 @@ public class ContactsRepository : IContactsRepository, IDisposable
         await _context.SaveChangesAsync();
     }
 
+    public bool ContactExists(int id)
+    {
+        return _context.contacts.Any(e => e.ContactId == id);
+    }
+
+
     //IDisposable Section
 
     private bool disposed = false;
