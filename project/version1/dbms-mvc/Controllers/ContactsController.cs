@@ -14,12 +14,10 @@ namespace dbms_mvc.Controllers
     [Authorize]
     public class ContactsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IContactsRepository _repository;
 
-        public ContactsController(ApplicationDbContext context, IContactsRepository repository)
+        public ContactsController(IContactsRepository repository)
         {
-            _context = context;
             _repository = repository;
         }
 
