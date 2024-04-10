@@ -148,11 +148,11 @@ public class ContactsRepositoryTests
         var result_emptyContact_fullList = await repository.SearchContacts(new Contact());
 
         //Assert
-        Assert.AreEqual(result_noMatch_emptyList.Count(), 0);
-        Assert.AreEqual(result_partialMatchWithBadData_emptyList.Count(), 0);
-        Assert.AreEqual(result_exactMatch_oneItemList.Count(), 1);
-        Assert.AreEqual(result_null_fullList.Count(), _context.contacts.Count());
-        Assert.AreEqual(result_emptyContact_fullList.Count(), _context.contacts.Count());
+        Assert.AreEqual(0, result_noMatch_emptyList.Count());
+        Assert.AreEqual(0, result_partialMatchWithBadData_emptyList.Count());
+        Assert.AreEqual(1, result_exactMatch_oneItemList.Count());
+        Assert.AreEqual(_context.contacts.Count(), result_null_fullList.Count());
+        Assert.AreEqual(_context.contacts.Count(), result_emptyContact_fullList.Count());
     }
 
     [TestMethod]
