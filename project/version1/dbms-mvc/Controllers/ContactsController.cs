@@ -57,13 +57,8 @@ namespace dbms_mvc.Controllers
         // GET: Contacts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var contact = await _context.contacts
-                .FirstOrDefaultAsync(m => m.ContactId == id);
+            var contact = await _repository.GetContactById(id);
             if (contact == null)
             {
                 return NotFound();
