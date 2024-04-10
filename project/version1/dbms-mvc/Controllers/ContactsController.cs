@@ -410,10 +410,5 @@ namespace dbms_mvc.Controllers
               $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
             return dateString;
         }
-
-        private bool ContactExists(int id)
-        {
-            return _context.contacts.Any(e => e.ContactId == id);
-        }
     }
 }
