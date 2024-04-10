@@ -17,7 +17,6 @@ public class ContactsRepositoryTests
         .UseInMemoryDatabase(
         Guid.NewGuid().ToString()
         );
-
         _context = new ApplicationDbContext(dbOptions.Options);
 
         _fixture = new Fixture();
@@ -31,7 +30,6 @@ public class ContactsRepositoryTests
 
         Contact testContact = _fixture.Create<Contact>();
 
-
         //Act
         await repository.AddContact(testContact);
 
@@ -39,5 +37,10 @@ public class ContactsRepositoryTests
         Contact dbContact = await _context.contacts.FirstOrDefaultAsync();
         Assert.AreEqual(testContact, dbContact);
         Assert.AreEqual(_context.contacts.Count(), 1);
+    }
+
+    [TestMethod]
+    public async Task GetContactById()
+    {
     }
 }
