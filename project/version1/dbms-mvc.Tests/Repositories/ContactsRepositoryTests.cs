@@ -101,6 +101,27 @@ public class ContactsRepositoryTests
         Assert.AreEqual(_context.contacts.Count(), 0);
     }
 
+    [TestMethod]
+    public async Task ContactExists()
+    {
+        //Arrange
+        CreateRepoAndContact(out IContactsRepository repository, out Contact testContact);
+
+        await _context.AddAsync(testContact);
+        await _context.SaveChangesAsync();
+
+        int notContactId = testContact.ContactId + 1;
+
+        //Act
+        bool doesExist = repository.ContactExists(testContact.ContactId);
+        bool doesNotExist = repository.ContactExists(notContactId);
+
+        //Assert
+        Assert.IsTrue(doesExist);
+        Assert.IsFalse(doesNotExist);
+
+    }
+
     private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
     {
         repository = new ContactsRepository(_context);
