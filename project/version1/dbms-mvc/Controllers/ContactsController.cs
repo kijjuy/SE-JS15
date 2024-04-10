@@ -71,12 +71,7 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "create, admin")]
         public async Task<IActionResult> Create()
         {
-            List<MailingList> mailingLists = await _context.mailingLists.ToListAsync();
-            ContactsViewModel viewModel = new ContactsViewModel
-            {
-                MailingLists = mailingLists
-            };
-            return View(viewModel);
+            return View(new Contact());
         }
 
         // POST: Contacts/Create
