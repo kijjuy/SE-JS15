@@ -98,7 +98,7 @@ public class ContactsRepositoryTests
         await repository.DeleteContact(testContact);
 
         //Assert
-        Assert.AreEqual(_context.contacts.Count(), 0);
+        Assert.AreEqual(0, _context.contacts.Count());
     }
 
     [TestMethod]
