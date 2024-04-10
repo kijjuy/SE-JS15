@@ -8,8 +8,8 @@ namespace dbms_mvc.Tests.Repositories;
 [TestClass]
 public class ContactsRepositoryTests
 {
-    private ApplicationDbContext _context;
-    private Fixture _fixture;
+    private readonly ApplicationDbContext _context;
+    private readonly Fixture _fixture;
 
     public ContactsRepositoryTests()
     {
