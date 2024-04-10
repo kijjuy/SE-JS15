@@ -68,6 +68,30 @@ public class ContactsController_IndexTests
         var result = controller.GetMatchingContacts(nonMatchingContact, allContacts, props);
 
         //Assert
-        Assert.AreEqual(result.Count(), 0);
+        Assert.AreEqual(result.Count(), 0, "Non-matching contacts are being returned");
+    }
+
+    [TestMethod]
+    public void GetMatchingContacts_IsMatch_ReturnPopulatedList()
+    {
+        //Arrange
+        Contact matchingContactFromDB = _context.contacts.FirstOrDefault();
+        string contactName = matchingContactFromDB.FirstName;
+        Contact matchingContact = new Contact
+        {
+            FirstName = contactName
+        };
+
+        var allContacts = _context.contacts.ToList();
+
+        var props = typeof(Contact).GetProperties();
+
+        var controller = new ContactsController(_context);
+
+        //Act
+        var result = controller.GetMatchingContacts(matchingContact, allContacts, props);
+
+        //Assert
+        Assert.IsTrue(result.Count() >= 1, "Matching contacts are not being returned");
     }
 }
