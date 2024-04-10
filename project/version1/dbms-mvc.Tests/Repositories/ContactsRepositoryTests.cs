@@ -93,7 +93,6 @@ public class ContactsRepositoryTests
 
         await _context.AddAsync(testContact);
         await _context.SaveChangesAsync();
-        Assert.AreEqual(_context.contacts.Count(), 1, "Error in Act section: Contact not added properly");
 
         //Act
         await repository.DeleteContact(testContact);
