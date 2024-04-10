@@ -170,6 +170,26 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "upload, admin")]
+        public async Task<IActionResult> Upload()
+        {
+            return View();
+        }
+
+        [HttpPost, ActionName("Upload")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "upload, admin")]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            List<Contact> newContacts = GetFormData(file);
+            List<MergeConflictViewModel> unresolvedMerges = await GetDupeContacts(newContacts);
+            if (unresolvedMerges.Count() > 0)
+            {
+                return View("ResolveConflicts", unresolvedMerges);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
         public async Task<List<MergeConflictViewModel>> GetDupeContacts(List<Contact> newContacts)
         {
             //List of contacts that already exist in slot one, and the newly added contact in slot 2
@@ -215,27 +235,8 @@ namespace dbms_mvc.Controllers
         }
 
 
-        [Authorize(Roles = "upload, admin")]
-        public async Task<IActionResult> Upload()
-        {
-            return View();
-        }
 
 
-        /// Method that is called when the upload button is clicked
-        [HttpPost, ActionName("Upload")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "upload, admin")]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-            List<Contact> newContacts = GetFormData(file);
-            List<MergeConflictViewModel> unresolvedMerges = await GetDupeContacts(newContacts);
-            if (unresolvedMerges.Count() > 0)
-            {
-                return View("ResolveConflicts", unresolvedMerges);
-            }
-            return RedirectToAction(nameof(Index));
-        }
 
         // Main function that handles logic
         private List<Contact> GetFormData(IFormFile file)
