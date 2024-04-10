@@ -37,6 +37,7 @@ public class ContactsRepositoryTests
 
         //Assert
         Contact dbContact = await _context.contacts.FirstOrDefaultAsync();
-        Assert.Equals(testContact, dbContact);
+        Assert.AreEqual(testContact, dbContact);
+        Assert.AreEqual(_context.contacts.Count(), 1);
     }
 }
