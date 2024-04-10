@@ -53,49 +53,6 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        public IEnumerable<Contact> GetMatchingContacts(Contact searchContact, IEnumerable<Contact> contacts, IEnumerable<PropertyInfo> props)
-        {
-            List<Contact> matchingContacts = new List<Contact>();
-            //TODO: maybe make async using mutex or other concurrency method
-            foreach (Contact contact in contacts)
-            {
-                bool isMatch = CheckContactMatch(searchContact, contact, props);
-                if (isMatch)
-                {
-                    matchingContacts.Add(contact);
-                }
-            }
-            return matchingContacts;
-        }
-
-        private bool CheckContactMatch(Contact searchContact, Contact dbContact, IEnumerable<PropertyInfo> props)
-        {
-            bool isMatch = true;
-            foreach (var prop in props)
-            {
-                if (!isMatch)
-                {
-                    break;
-                }
-
-                var searchPropValue = prop.GetValue(searchContact);
-                if (searchPropValue == null)
-                {
-                    continue;
-                }
-
-                var dbPropValue = prop.GetValue(dbContact);
-                string dbValStr = dbPropValue.ToString().ToLower();
-                string searchValStr = searchPropValue.ToString().ToLower();
-                bool dbValContainsSearchVal = dbValStr.Contains(searchValStr);
-                if (dbPropValue == null || !dbValContainsSearchVal)
-                {
-                    isMatch = false;
-                    break;
-                }
-            }
-            return isMatch;
-        }
 
         // GET: Contacts/Details/5
         public async Task<IActionResult> Details(int? id)
