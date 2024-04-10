@@ -155,6 +155,41 @@ public class ContactsRepositoryTests
         Assert.AreEqual(result_emptyContact_fullList.Count(), _context.contacts.Count());
     }
 
+    [TestMethod]
+    public async Task GetUploadMergeConflicts()
+    {
+        //Arrange
+        var repository = new ContactsRepository(_context);
+        var noMatchContacts = _fixture.CreateMany<Contact>(5);
+        var dbContacts = _fixture.CreateMany<Contact>(50);
+
+        await _context.AddRangeAsync(dbContacts);
+        await _context.SaveChangesAsync();
+
+        IEnumerable<Contact> firstDbContactInEnum = dbContacts.Take(1);
+        Contact firstDbContact = firstDbContactInEnum.FirstOrDefault();
+
+        var partialMatchContact = new Contact()
+        {
+            FirstName = firstDbContact.FirstName,
+            LastName = firstDbContact.LastName,
+            Organization = "Not the same"
+        };
+        var partialMatchContactInList = new List<Contact>();
+        partialMatchContactInList.Add(partialMatchContact);
+
+        //Act
+        var result_noMatch_emptyList = await repository.GetUploadMergeConflicts(noMatchContacts);
+        var result_partialMatch_oneItemList = await repository.GetUploadMergeConflicts(partialMatchContactInList);
+        var result_exactMatch_emptyList = await repository.GetUploadMergeConflicts(firstDbContactInEnum);
+
+        //Assert
+        Assert.AreEqual(_context.contacts.Count(), noMatchContacts.Count() + dbContacts.Count());
+        Assert.AreEqual(0, result_noMatch_emptyList.Count());
+        Assert.AreEqual(1, result_partialMatch_oneItemList.Count());
+        Assert.AreEqual(0, result_exactMatch_emptyList.Count());
+    }
+
     private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
     {
         repository = new ContactsRepository(_context);
