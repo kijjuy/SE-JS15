@@ -56,6 +56,35 @@ public class ContactsRepositoryTests
         Assert.AreEqual(_context.contacts.Count(), 1);
     }
 
+    [TestMethod]
+    public async Task UpdateContact()
+    {
+        //Arrange
+        CreateRepoAndContact(out IContactsRepository repository, out Contact testContact);
+
+        await _context.AddAsync(testContact);
+        await _context.SaveChangesAsync();
+
+        string oldName = testContact.FirstName;
+        testContact.FirstName = "changed";
+
+        //Act
+        await repository.UpdateContact(testContact);
+
+        //Assert
+        Contact dbContact = _context.contacts.Find(testContact.ContactId);
+        var props = typeof(Contact).GetProperties().Where(p => p.Name != nameof(Contact.FirstName));
+
+        Assert.IsNotNull(dbContact);
+        Assert.AreNotEqual(oldName, dbContact.FirstName);
+        foreach (var prop in props)
+        {
+            var testVal = prop.GetValue(testContact);
+            var dbVal = prop.GetValue(dbContact);
+            Assert.AreEqual(testVal, dbVal);
+        }
+    }
+
     private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
     {
         repository = new ContactsRepository(_context);
