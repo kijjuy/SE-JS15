@@ -415,9 +415,5 @@ namespace dbms_mvc.Controllers
         {
             return _context.contacts.Any(e => e.ContactId == id);
         }
-        public bool Contactsearch(int id)
-        {
-            return true;
-        }
     }
 }
