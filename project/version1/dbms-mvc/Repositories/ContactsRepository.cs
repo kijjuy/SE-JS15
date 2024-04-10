@@ -237,6 +237,13 @@ public class ContactsRepository : IContactsRepository, IDisposable
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Checks if contact with <paramref name="id"/> exists.
+    /// </summary>
+    /// <param name="id">id used to check contact</param>
+    /// <returns>
+    ///	bool: True if exists, False if doesn't.
+    /// </returns>
     public bool ContactExists(int id)
     {
         return _context.contacts.Any(e => e.ContactId == id);
