@@ -26,9 +26,7 @@ public class ContactsRepositoryTests
     public async Task AddContact()
     {
         //Arrange
-        IContactsRepository repository = new ContactsRepository(_context);
-
-        Contact testContact = _fixture.Create<Contact>();
+        CreateRepoAndContat(out var repository, out var testContact);
 
         //Act
         await repository.AddContact(testContact);
