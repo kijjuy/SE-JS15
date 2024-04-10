@@ -128,7 +128,7 @@ namespace dbms_mvc.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ContactExists(contact.ContactId))
+                    if (!_repository.ContactExists(contact.ContactId))
                     {
                         return NotFound();
                     }
