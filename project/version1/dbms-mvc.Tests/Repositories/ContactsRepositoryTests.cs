@@ -142,13 +142,17 @@ public class ContactsRepositoryTests
 
         //Act
         var result_noMatch_emptyList = await repository.SearchContacts(testContact);
-        var result_partialMatch_oneItemList = await repository.SearchContacts(partialMatchContact);
-        var result_exactMatch_emptyList = await repository.SearchContacts(firstDbContact);
+        var result_partialMatchWithBadData_emptyList = await repository.SearchContacts(partialMatchContact);
+        var result_exactMatch_oneItemList = await repository.SearchContacts(firstDbContact);
+        var result_null_fullList = await repository.SearchContacts(null);
+        var result_emptyContact_fullList = await repository.SearchContacts(new Contact());
 
         //Assert
         Assert.AreEqual(result_noMatch_emptyList.Count(), 0);
-        Assert.AreEqual(result_partialMatch_oneItemList.Count(), 1);
-        Assert.AreEqual(result_exactMatch_emptyList.Count(), 0);
+        Assert.AreEqual(result_partialMatchWithBadData_emptyList.Count(), 0);
+        Assert.AreEqual(result_exactMatch_oneItemList.Count(), 1);
+        Assert.AreEqual(result_null_fullList.Count(), _context.contacts.Count());
+        Assert.AreEqual(result_emptyContact_fullList.Count(), _context.contacts.Count());
     }
 
     private void CreateRepoAndContact(out IContactsRepository repository, out Contact contact)
