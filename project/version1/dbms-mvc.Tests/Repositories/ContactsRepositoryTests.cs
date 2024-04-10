@@ -33,6 +33,8 @@ public class ContactsRepositoryTests
 
         //Assert
         Contact dbContact = await _context.contacts.FirstOrDefaultAsync();
+
+        Assert.IsNotNull(dbContact);
         Assert.AreEqual(testContact, dbContact);
         Assert.AreEqual(_context.contacts.Count(), 1);
     }
