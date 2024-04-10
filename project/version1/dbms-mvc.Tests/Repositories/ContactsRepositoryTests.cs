@@ -11,8 +11,7 @@ public class ContactsRepositoryTests
     private ApplicationDbContext _context;
     private Fixture _fixture;
 
-    [TestInitialize]
-    public void Setup()
+    public ContactsRepositoryTests()
     {
         DbContextOptionsBuilder<ApplicationDbContext> dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(
