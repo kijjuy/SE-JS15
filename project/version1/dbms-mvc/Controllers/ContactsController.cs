@@ -182,41 +182,12 @@ namespace dbms_mvc.Controllers
         public async Task<IActionResult> Upload(IFormFile file)
         {
             List<Contact> newContacts = GetFormData(file);
-            List<MergeConflictViewModel> unresolvedMerges = await GetDupeContacts(newContacts);
+            IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
             if (unresolvedMerges.Count() > 0)
             {
                 return View("ResolveConflicts", unresolvedMerges);
             }
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<List<MergeConflictViewModel>> GetDupeContacts(List<Contact> newContacts)
-        {
-            //List of contacts that already exist in slot one, and the newly added contact in slot 2
-            List<MergeConflictViewModel> unresolvedMerges = new List<MergeConflictViewModel>();
-
-            foreach (Contact newContact in newContacts)
-            {
-                if (newContact.FirstName == "")
-                {
-                    continue;
-                }
-
-                Contact dupeContact = await _context.contacts
-                    .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
-                    .FirstOrDefaultAsync();
-
-                if (dupeContact != null)
-                {
-                    string message = "There is already a contact with that name.";
-                    unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                    Console.WriteLine("------------------ Adding new contact ------------------");
-                    _context.contacts.Add(newContact);
-                }
-            }
-            _context.SaveChanges();
-
-            return unresolvedMerges;
         }
 
         [HttpPost, ActionName("MergeResolver")]
