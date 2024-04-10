@@ -18,6 +18,7 @@ public class ContactController_UploadTests
         _fixture = new Fixture();
 
         _context = await TestHelper.GenerateContactsContext();
+        //Assert.IsTrue(_context.contacts.Count() > 0, "Failed to initialize class. Db was empty");
     }
 
     [TestMethod]
