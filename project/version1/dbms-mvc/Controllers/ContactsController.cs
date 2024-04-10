@@ -99,7 +99,7 @@ namespace dbms_mvc.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.contacts.FindAsync(id);
+            var contact = await _repository.GetContactById(id);
             if (contact == null)
             {
                 return NotFound();
