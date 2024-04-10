@@ -191,6 +191,14 @@ public class ContactsRepository : IContactsRepository, IDisposable
         return unresolvedMerges;
     }
 
+    /// <summary>
+    /// Gets the <c>Contact</c> that matches the <c>Contact.FirstName</c> and <c>Contact.LastName</c>
+    /// of <paramref name="newContact"/>.
+    /// </summary>
+    /// <param name="newContact"><c>Contact</c> to check the FirstName and LastName of.</param>
+    /// <returns>
+    /// <c>Contact</c> matching <paramref name="newContact"/> or <see langword="null"/>.
+    /// </returns>
     private async Task<Contact?> CheckContactNamesMatch(Contact newContact)
     {
         return await _context.contacts
