@@ -161,13 +161,12 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "delete, admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contact = await _context.contacts.FindAsync(id);
+            var contact = await _repository.GetContactById(id);
             if (contact != null)
             {
-                _context.contacts.Remove(contact);
+                await _repository.DeleteContact(contact);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
