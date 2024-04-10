@@ -188,6 +188,16 @@ public class ContactsRepository : IContactsRepository, IDisposable
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Removes <paramref name="contact"/> from the database.
+    /// </summary>
+    /// <param name="contact">Contact to remove from the database.</param>
+    public async Task DeleteContact(Contact contact)
+    {
+        _context.Remove(contact);
+        await _context.SaveChangesAsync();
+    }
+
     //IDisposable Section
 
     private bool disposed = false;
