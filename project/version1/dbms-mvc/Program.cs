@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using dbms_mvc.Data;
 using dbms_mvc.Repositories;
+using dbms_mvc.Services;
 
 namespace dbms_mvc;
 
@@ -28,6 +29,8 @@ public class Program
         builder.Services.AddControllersWithViews();
 
         builder.Services.AddScoped<IContactsRepository, ContactsRepository>();
+
+        builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
 
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
