@@ -155,6 +155,19 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<RedirectToActionResult>(result_validContact_redirect);
     }
 
+    [TestMethod]
+    public void UploadView()
+    {
+        //Arrange
+        var controller = new ContactsController(_repository);
+
+        //Act
+        var result_view = controller.Upload();
+
+        //Assert
+        Assert.IsInstanceOfType<ViewResult>(result_view);
+    }
+
     private void CreateControllerAndContact(out ContactsController controller, out Contact contact)
     {
         controller = new ContactsController(_repository);
