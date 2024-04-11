@@ -17,6 +17,18 @@ public class Contact
             var thisVal = prop.GetValue(this);
             var checkVal = prop.GetValue(checkContact);
 
+            //Both null, skip
+            if (thisVal == null && checkVal == null)
+            {
+                continue;
+            }
+
+            //One is null, not match
+            if (thisVal == null || checkVal == null)
+            {
+                return false;
+            }
+
             if (!thisVal.Equals(checkVal))
             {
                 return false;
