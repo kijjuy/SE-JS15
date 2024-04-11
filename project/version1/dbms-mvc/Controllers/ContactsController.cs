@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
 using dbms_mvc.Models;
 using dbms_mvc.Repositories;
+using dbms_mvc.Services;
 
 namespace dbms_mvc.Controllers
 {
@@ -13,14 +14,17 @@ namespace dbms_mvc.Controllers
     {
         private readonly IContactsRepository _repository;
 
-        private static IEnumerable<string> SupportedContentTypes = new List<string>
-        {
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        };
+        private readonly ISpreadsheetService _spreadsheetService;
 
-        public ContactsController(IContactsRepository repository)
+        private static IEnumerable<string> SupportedContentTypes = new List<string>
+            {
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            };
+
+        public ContactsController(IContactsRepository repository, ISpreadsheetService spreadsheetService)
         {
             _repository = repository;
+            _spreadsheetService = spreadsheetService;
         }
 
         // GET: Contacts
