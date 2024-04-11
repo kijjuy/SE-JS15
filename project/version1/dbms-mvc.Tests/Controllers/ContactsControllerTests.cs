@@ -143,4 +143,10 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<NotFoundResult>(result_idNotMatch_notFound);
         Assert.IsInstanceOfType<ViewResult>(result_idMatch_view);
     }
+
+    private void CreateControllerAndContact(out ContactsController controller, out Contact contact)
+    {
+        controller = new ContactsController(_repository);
+        contact = _fixture.Create<Contact>();
+    }
 }
