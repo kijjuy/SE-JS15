@@ -29,11 +29,9 @@ public class ContactsControllerTests
     public async Task Index()
     {
         //Arrange
-        var controller = new ContactsController(_repository);
-
+        CreateControllerAndContact(out var controller, out Contact withDataContact);
         Contact nullContact = null;
         Contact emptyContact = new Contact();
-        Contact withDataContact = _fixture.Create<Contact>();
 
         //Act
         var result_null_view = await controller.Index(nullContact);
@@ -50,8 +48,7 @@ public class ContactsControllerTests
     public async Task Details()
     {
         //Arrange
-        var controller = new ContactsController(_repository);
-        Contact dbContact = _fixture.Create<Contact>();
+        CreateControllerAndContact(out var controller, out Contact dbContact);
 
         await _repository.AddContact(dbContact);
 
@@ -72,8 +69,7 @@ public class ContactsControllerTests
     public async Task Create()
     {
         //Arrage
-        var controller = new ContactsController(_repository);
-        Contact validContact = _fixture.Create<Contact>();
+        CreateControllerAndContact(out var controller, out Contact validContact);
         Contact invalidContact = new Contact();
 
         //Act
@@ -87,8 +83,7 @@ public class ContactsControllerTests
     public async Task EditView()
     {
         //Arrange
-        var controller = new ContactsController(_repository);
-        Contact dbContact = _fixture.Create<Contact>();
+        CreateControllerAndContact(out var controller, out Contact dbContact);
 
         await _repository.AddContact(dbContact);
 
@@ -107,8 +102,7 @@ public class ContactsControllerTests
     public async Task EditConfirmed()
     {
         //Arrange
-        var controller = new ContactsController(_repository);
-        Contact dbContact = _fixture.Create<Contact>();
+        CreateControllerAndContact(out var controller, out Contact dbContact);
         Contact nonDbContact = _fixture.Create<Contact>();
 
         await _repository.AddContact(dbContact);
@@ -130,8 +124,7 @@ public class ContactsControllerTests
     [TestMethod]
     public async Task DeleteView()
     {
-        var controller = new ContactsController(_repository);
-        Contact dbContact = _fixture.Create<Contact>();
+        CreateControllerAndContact(out var controller, out Contact dbContact);
 
         await _repository.AddContact(dbContact);
 
