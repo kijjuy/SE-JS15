@@ -176,16 +176,23 @@ public class ContactsRepository : IContactsRepository, IDisposable
 
             Contact dupeContact = await CheckContactNamesMatch(newContact);
 
-            if (dupeContact != null)
+            //Dupe doesn't exist, can add
+            if (dupeContact == null)
             {
-                string message = "There is already a contact with that name.";
-                unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                //Log Here
-            }
-            else
-            {
+                //Log add
                 await this.AddContact(newContact);
+                continue;
             }
+
+            //Dupe is exact match, skip
+            if (dupeContact.Equals(newContact))
+            {
+                continue;
+            }
+
+            string message = "There is already a contact with that name.";
+            unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
+            //Log Here
         }
 
         return unresolvedMerges;

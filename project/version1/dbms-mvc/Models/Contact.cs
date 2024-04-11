@@ -3,22 +3,39 @@ using System.ComponentModel.DataAnnotations;
 public class Contact
 {
 
-    //TODO: Do something with this commented code
-    //    public Contact(string firstName, string lastName, string organization, string title, string streetAddress1, string city, string province, string postalCode, char subscribed, string email, string phone, MailingList mailingList)
-    //    {
-    //        this.FirstName = firstName;
-    //        this.LastName = lastName;
-    //        this.Organization = organization;
-    //        this.Title = title;
-    //        this.StreetAddress1 = streetAddress1;
-    //        this.City = city;
-    //        this.Province = province;
-    //        this.PostalCode = postalCode;
-    //        this.Subscribed  = subscribed;
-    //        this.Email = email;
-    //        this.Phone = phone;
-    //        this.MailingList = mailingList;
-    //    }
+    public override bool Equals(Object? obj)
+    {
+        if (obj.GetType() != this.GetType())
+        {
+            return false;
+        }
+        Contact checkContact = (Contact)obj;
+        var props = typeof(Contact).GetProperties().Where(p => p.Name != nameof(Contact.ContactId));
+
+        foreach (var prop in props)
+        {
+            var thisVal = prop.GetValue(this);
+            var checkVal = prop.GetValue(checkContact);
+
+            //Both null, skip
+            if (thisVal == null && checkVal == null)
+            {
+                continue;
+            }
+
+            //One is null, not match
+            if (thisVal == null || checkVal == null)
+            {
+                return false;
+            }
+
+            if (!thisVal.Equals(checkVal))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     [Key]
     public int ContactId { get; set; }
