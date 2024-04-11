@@ -13,6 +13,11 @@ namespace dbms_mvc.Controllers
     {
         private readonly IContactsRepository _repository;
 
+        private static IEnumerable<string> SupportedContentTypes = new List<string>
+        {
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        };
+
         public ContactsController(IContactsRepository repository)
         {
             _repository = repository;
