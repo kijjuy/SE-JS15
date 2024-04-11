@@ -8,6 +8,12 @@
 </head>
 
 <body>
+    <div id="errors">
+	@if (ViewBag.ErrorMessage != null)
+	{
+	<span class="text-danger">@ViewBag.ErrorMessage</span>
+	}
+    </div>
     <div id="upload-file">
         <form method="post" action="Upload" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
