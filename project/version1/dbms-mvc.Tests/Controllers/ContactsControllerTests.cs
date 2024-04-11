@@ -138,6 +138,23 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<ViewResult>(result_idMatch_view);
     }
 
+    [TestMethod]
+    public async Task DeleteConfirmed()
+    {
+        //Arrange
+        CreateControllerAndContact(out var controller, out Contact dbContact);
+
+        await _repository.AddContact(dbContact);
+
+        //Act
+        var result_idNotMatch_redirect = await controller.DeleteConfirmed(dbContact.ContactId + 1);
+        var result_validContact_redirect = await controller.DeleteConfirmed(dbContact.ContactId);
+
+        //Assert
+        Assert.IsInstanceOfType<RedirectToActionResult>(result_idNotMatch_redirect);
+        Assert.IsInstanceOfType<RedirectToActionResult>(result_validContact_redirect);
+    }
+
     private void CreateControllerAndContact(out ContactsController controller, out Contact contact)
     {
         controller = new ContactsController(_repository);
