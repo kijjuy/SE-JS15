@@ -67,4 +67,19 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<NotFoundResult>(result_noMatch_notFound);
         Assert.IsInstanceOfType<ViewResult>(result_match_view);
     }
+
+    [TestMethod]
+    public async Task Create()
+    {
+        //Arrage
+        var controller = new ContactsController(_repository);
+        Contact validContact = _fixture.Create<Contact>();
+        Contact invalidContact = new Contact();
+
+        //Act
+        var result_validContact_redirect = await controller.Create(validContact);
+
+        //Assert
+        Assert.IsInstanceOfType<RedirectToActionResult>(result_validContact_redirect);
+    }
 }
