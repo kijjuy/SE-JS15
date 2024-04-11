@@ -126,4 +126,21 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<NotFoundResult>(result_nonDbContact_notFound);
         Assert.IsInstanceOfType<RedirectToActionResult>(result_validEdit_redirect);
     }
+
+    [TestMethod]
+    public async Task DeleteView()
+    {
+        var controller = new ContactsController(_repository);
+        Contact dbContact = _fixture.Create<Contact>();
+
+        await _repository.AddContact(dbContact);
+
+        //Act
+        var result_idNotMatch_notFound = await controller.Delete(dbContact.ContactId + 1);
+        var result_idMatch_view = await controller.Delete(dbContact.ContactId);
+
+        //Assert
+        Assert.IsInstanceOfType<NotFoundResult>(result_idNotMatch_notFound);
+        Assert.IsInstanceOfType<ViewResult>(result_idMatch_view);
+    }
 }
