@@ -1,7 +1,30 @@
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 public class Contact
 {
+
+    public override bool Equals(Object? obj)
+    {
+        if (obj.GetType != this.GetType)
+        {
+            return false;
+        }
+        Contact checkContact = (Contact)obj;
+        var props = typeof(Contact).GetProperties().Where(p => p.Name != nameof(Contact.ContactId));
+
+        foreach (var prop in props)
+        {
+            var thisVal = prop.GetValue(this);
+            var checkVal = prop.GetValue(checkContact);
+
+            if (!thisVal.Equals(checkVal))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     [Key]
     public int ContactId { get; set; }
