@@ -82,4 +82,24 @@ public class ContactsControllerTests
         //Assert
         Assert.IsInstanceOfType<RedirectToActionResult>(result_validContact_redirect);
     }
+
+    [TestMethod]
+    public async Task EditView()
+    {
+        //Arrange
+        var controller = new ContactsController(_repository);
+        Contact dbContact = _fixture.Create<Contact>();
+
+        await _repository.AddContact(dbContact);
+
+        //Act
+        var result_idNull_notFound = await controller.Edit(null);
+        var result_idNotMatch_notFound = await controller.Edit(dbContact.ContactId + 1);
+        var result_idMatch_view = await controller.Edit(dbContact.ContactId);
+
+        //Assert
+        Assert.IsInstanceOfType<NotFoundResult>(result_idNull_notFound);
+        Assert.IsInstanceOfType<NotFoundResult>(result_idNotMatch_notFound);
+        Assert.IsInstanceOfType<ViewResult>(result_idMatch_view);
+    }
 }
