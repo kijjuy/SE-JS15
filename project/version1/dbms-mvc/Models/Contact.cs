@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 
 public class Contact
 {
 
     public override bool Equals(Object? obj)
     {
-        if (obj.GetType != this.GetType)
+        if (obj.GetType() != this.GetType())
         {
             return false;
         }
