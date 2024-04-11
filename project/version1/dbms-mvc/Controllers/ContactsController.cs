@@ -13,6 +13,11 @@ namespace dbms_mvc.Controllers
     {
         private readonly IContactsRepository _repository;
 
+        private static IEnumerable<string> SupportedContentTypes = new List<string>
+        {
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        };
+
         public ContactsController(IContactsRepository repository)
         {
             _repository = repository;
@@ -176,6 +181,20 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
+            if (file == null)
+            {
+                //Log error
+                ViewBag.ErrorMessage = "You must select a file before uploading.";
+                return View();
+            }
+
+            if (!SupportedContentTypes.Contains(file.ContentType))
+            {
+                //Log error
+                ViewBag.ErrorMessage = "File type is not supported.";
+                return View();
+            }
+
             List<Contact> newContacts = GetFormData(file);
             IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
             if (unresolvedMerges.Count() > 0)
