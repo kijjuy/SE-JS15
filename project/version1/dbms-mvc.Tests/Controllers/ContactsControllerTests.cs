@@ -168,6 +168,16 @@ public class ContactsControllerTests
         Assert.IsInstanceOfType<ViewResult>(result_view);
     }
 
+    //[TestMethod]
+    //public async Task UploadConfirmed()
+    //{
+    //    //Arrange
+    //    var controller = new ContactsController(_repository);
+
+    //    string filename = "test.xlsx";
+    //    var content = File.OpenRead("sample-excel.xlsx");
+    //}
+
     private void CreateControllerAndContact(out ContactsController controller, out Contact contact)
     {
         controller = new ContactsController(_repository);
