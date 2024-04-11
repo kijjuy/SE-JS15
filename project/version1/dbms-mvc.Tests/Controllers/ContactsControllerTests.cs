@@ -124,6 +124,7 @@ public class ContactsControllerTests
     [TestMethod]
     public async Task DeleteView()
     {
+        //Arrange
         CreateControllerAndContact(out var controller, out Contact dbContact);
 
         await _repository.AddContact(dbContact);
