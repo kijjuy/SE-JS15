@@ -11,6 +11,7 @@ pkgs.mkShell rec {
     zlib.dev
     openssl
     dotnetPkg
+    azure-cli
   ];
 
   NIX_LD_LIBRARY_PATH = lib.makeLibraryPath ([
