@@ -184,7 +184,10 @@ public class ContactsRepository : IContactsRepository, IDisposable
                 continue;
             }
 
+            //Dupe is exact match, skip
+            if (dupeContact.Equals(newContact))
             {
+                continue;
             }
 
             string message = "There is already a contact with that name.";
