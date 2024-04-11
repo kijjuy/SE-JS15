@@ -1,49 +1,46 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using dbms_mvc.Data;
-using dbms_mvc.Models;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
-using System.IO;
-using System.Reflection;
+using dbms_mvc.Models;
+using dbms_mvc.Repositories;
 
 namespace dbms_mvc.Controllers
 {
     [Authorize]
     public class ContactsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IContactsRepository _repository;
 
-        public ContactsController(ApplicationDbContext context)
+        public ContactsController(IContactsRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Contacts
         public async Task<IActionResult> Index(Contact? searchContact)
         {
-            List<Contact> contacts = await _context.contacts.ToListAsync();
-            if (searchContact == null)
-            {
-                return View(contacts);
-            }
-            var props = typeof(Contact).GetProperties().ToList();
-            props = props.Where(p => p.Name != "ContactId").ToList();
-
-            contacts = GetMatchingContacts(searchContact, contacts, props).ToList();
-            SetSearchViewData(searchContact, props);
+            var contacts = await _repository.SearchContacts(searchContact);
+            SetSearchViewData(searchContact);
             return View(contacts);
         }
 
-        private void SetSearchViewData(Contact searchContact, IEnumerable<PropertyInfo> props)
+        private void SetSearchViewData(Contact? searchContact)
         {
+            if (searchContact == null)
+            {
+                return;
+            }
+
+            var props = typeof(Contact).GetProperties().ToList();
+            props = props.Where(p => p.Name != "ContactId").ToList();
             foreach (var prop in props)
             {
                 var propValue = prop.GetValue(searchContact);
                 if (propValue == null)
                 {
-                    ViewData[prop.Name] = "";
+                    ViewData["prop-" + prop.Name] = "";
                     continue;
                 }
                 Console.WriteLine($"Adding prop value with value={propValue}");
@@ -51,60 +48,12 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        private IEnumerable<Contact> GetMatchingContacts(Contact searchContact, IEnumerable<Contact> contacts, IEnumerable<PropertyInfo> props)
-        {
-            List<Contact> matchingContacts = new List<Contact>();
-            //TODO: maybe make async using mutex or other concurrency method
-            foreach (Contact contact in contacts)
-            {
-                bool isMatch = CheckContactMatch(searchContact, contact, props);
-                if (isMatch)
-                {
-                    matchingContacts.Add(contact);
-                }
-            }
-            return matchingContacts;
-        }
-
-        private bool CheckContactMatch(Contact searchContact, Contact dbContact, IEnumerable<PropertyInfo> props)
-        {
-            bool isMatch = true;
-            foreach (var prop in props)
-            {
-                if (!isMatch)
-                {
-                    break;
-                }
-
-                var searchPropValue = prop.GetValue(searchContact);
-                if (searchPropValue == null)
-                {
-                    continue;
-                }
-
-                var dbPropValue = prop.GetValue(dbContact);
-                string dbValStr = dbPropValue.ToString().ToLower();
-                string searchValStr = searchPropValue.ToString().ToLower();
-                bool dbValContainsSearchVal = dbValStr.Contains(searchValStr);
-                if (dbPropValue == null || !dbValContainsSearchVal)
-                {
-                    isMatch = false;
-                    break;
-                }
-            }
-            return isMatch;
-        }
 
         // GET: Contacts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var contact = await _context.contacts
-                .FirstOrDefaultAsync(m => m.ContactId == id);
+            var contact = await _repository.GetContactById(id);
             if (contact == null)
             {
                 return NotFound();
@@ -115,14 +64,9 @@ namespace dbms_mvc.Controllers
 
         // GET: Contacts/Create
         [Authorize(Roles = "create, admin")]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            List<MailingList> mailingLists = await _context.mailingLists.ToListAsync();
-            ContactsViewModel viewModel = new ContactsViewModel
-            {
-                MailingLists = mailingLists
-            };
-            return View(viewModel);
+            return View(new Contact());
         }
 
         // POST: Contacts/Create
@@ -135,8 +79,7 @@ namespace dbms_mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(contact);
-                await _context.SaveChangesAsync();
+                await _repository.AddContact(contact);
                 return RedirectToAction(nameof(Index));
             }
             return View();
@@ -151,7 +94,7 @@ namespace dbms_mvc.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.contacts.FindAsync(id);
+            var contact = await _repository.GetContactById(id);
             if (contact == null)
             {
                 return NotFound();
@@ -176,12 +119,11 @@ namespace dbms_mvc.Controllers
             {
                 try
                 {
-                    _context.Update(contact);
-                    await _context.SaveChangesAsync();
+                    await _repository.UpdateContact(contact);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ContactExists(contact.ContactId))
+                    if (!_repository.ContactExists(contact.ContactId))
                     {
                         return NotFound();
                     }
@@ -199,13 +141,7 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "delete, admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var contact = await _context.contacts
-                .FirstOrDefaultAsync(m => m.ContactId == id);
+            var contact = await _repository.GetContactById(id);
             if (contact == null)
             {
                 return NotFound();
@@ -220,47 +156,33 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "delete, admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contact = await _context.contacts.FindAsync(id);
+            var contact = await _repository.GetContactById(id);
             if (contact != null)
             {
-                _context.contacts.Remove(contact);
+                await _repository.DeleteContact(contact);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<List<MergeConflictViewModel>> GetDupeContacts(List<Contact> newContacts)
+        [Authorize(Roles = "upload, admin")]
+        public IActionResult Upload()
         {
-            //List of contacts that already exist in slot one, and the newly added contact in slot 2
-            List<MergeConflictViewModel> unresolvedMerges = new List<MergeConflictViewModel>();
+            return View();
+        }
 
-            foreach (Contact newContact in newContacts)
+        [HttpPost, ActionName("Upload")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "upload, admin")]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            List<Contact> newContacts = GetFormData(file);
+            IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
+            if (unresolvedMerges.Count() > 0)
             {
-                if (newContact.FirstName == "")
-                {
-                    continue;
-                }
-
-                Contact dupeContact = await _context.contacts
-                    .Where(c => c.FirstName == newContact.FirstName && c.LastName == newContact.LastName)
-                    .FirstOrDefaultAsync();
-
-                if (dupeContact != null)
-                {
-                    Console.WriteLine("Adding Merge conflict");
-                    string message = "There is already a contact with that name.";
-                    unresolvedMerges.Add(new MergeConflictViewModel(newContact, dupeContact, message));
-                }
-                else if (newContact != null && dupeContact == null)
-                {
-                    Console.WriteLine("------------------ Adding new contact ------------------");
-                    _context.contacts.Add(newContact);
-                }
+                return View("ResolveConflicts", unresolvedMerges);
             }
-            _context.SaveChanges();
-
-            return unresolvedMerges;
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost, ActionName("MergeResolver")]
@@ -268,37 +190,14 @@ namespace dbms_mvc.Controllers
         {
             foreach (var inputModel in replaceInputModels)
             {
-                await _context.AddAsync(inputModel.NewContact);
-                Console.WriteLine($"--------------------  Added contact with name: {inputModel.NewContact.FirstName} {inputModel.NewContact.LastName}");
-                var contact = await _context.contacts.FindAsync(inputModel.ReplaceContactId);
-                Console.WriteLine($"Removed contact with id: {inputModel.ReplaceContactId}");
-                _context.contacts.Remove(contact);
+                await _repository.AddContact(inputModel.NewContact);
+
+                var removeContact = await _repository.GetContactById(inputModel.ReplaceContactId);
+
+                _repository.DeleteContact(removeContact);
             }
-            await _context.SaveChangesAsync();
+
             return Ok();
-        }
-
-
-        [Authorize(Roles = "upload, admin")]
-        public async Task<IActionResult> Upload()
-        {
-            return View();
-        }
-
-
-        /// Method that is called when the upload button is clicked
-        [HttpPost, ActionName("Upload")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "upload, admin")]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-            List<Contact> newContacts = GetFormData(file);
-            List<MergeConflictViewModel> unresolvedMerges = await GetDupeContacts(newContacts);
-            if (unresolvedMerges.Count() > 0)
-            {
-                return View("ResolveConflicts", unresolvedMerges);
-            }
-            return RedirectToAction(nameof(Index));
         }
 
         // Main function that handles logic
@@ -505,15 +404,6 @@ namespace dbms_mvc.Controllers
             string dateString =
               $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
             return dateString;
-        }
-
-        private bool ContactExists(int id)
-        {
-            return _context.contacts.Any(e => e.ContactId == id);
-        }
-        public bool Contactsearch(int id)
-        {
-            return true;
         }
     }
 }
