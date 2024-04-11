@@ -183,6 +183,11 @@ namespace dbms_mvc.Controllers
         {
             if (file == null)
             {
+            }
+
+            if (!SupportedContentTypes.Contains(file.ContentType))
+            {
+                //Log error
                 return View();
             }
 
