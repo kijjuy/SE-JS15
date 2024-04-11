@@ -3,23 +3,6 @@ using System.ComponentModel.DataAnnotations;
 public class Contact
 {
 
-    //TODO: Do something with this commented code
-    //    public Contact(string firstName, string lastName, string organization, string title, string streetAddress1, string city, string province, string postalCode, char subscribed, string email, string phone, MailingList mailingList)
-    //    {
-    //        this.FirstName = firstName;
-    //        this.LastName = lastName;
-    //        this.Organization = organization;
-    //        this.Title = title;
-    //        this.StreetAddress1 = streetAddress1;
-    //        this.City = city;
-    //        this.Province = province;
-    //        this.PostalCode = postalCode;
-    //        this.Subscribed  = subscribed;
-    //        this.Email = email;
-    //        this.Phone = phone;
-    //        this.MailingList = mailingList;
-    //    }
-
     [Key]
     public int ContactId { get; set; }
 
