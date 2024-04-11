@@ -183,11 +183,15 @@ namespace dbms_mvc.Controllers
         {
             if (file == null)
             {
+                //Log error
+                ViewBag.ErrorMessage = "You must select a file before uploading.";
+                return View();
             }
 
             if (!SupportedContentTypes.Contains(file.ContentType))
             {
                 //Log error
+                ViewBag.ErrorMessage = "File type is not supported.";
                 return View();
             }
 
