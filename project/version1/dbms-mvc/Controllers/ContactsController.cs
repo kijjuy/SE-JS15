@@ -176,6 +176,11 @@ namespace dbms_mvc.Controllers
         [Authorize(Roles = "upload, admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
+            if (file == null)
+            {
+                return View();
+            }
+
             List<Contact> newContacts = GetFormData(file);
             IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
             if (unresolvedMerges.Count() > 0)
