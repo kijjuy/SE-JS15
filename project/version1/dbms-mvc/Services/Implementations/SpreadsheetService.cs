@@ -118,4 +118,12 @@ public class SpreadsheetService : ISpreadsheetService
         }
         return contact;
     }
+
+    private string GetColumnNameFromContactProp(PropertyInfo prop)
+    {
+        var attributes = prop.GetCustomAttributes(false);
+        var attribute = attributes
+          .Where(a => a.GetType() == typeof(SpreadsheetColumnAttribute)).First() as SpreadsheetColumnAttribute;
+        return attribute.PrimaryName;
+    }
 }
