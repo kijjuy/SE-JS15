@@ -1,3 +1,4 @@
+using System.Reflection;
 using ClosedXML.Excel;
 using ExcelDataReader;
 using dbms_mvc.Models;
@@ -40,43 +41,29 @@ public class SpreadsheetService : ISpreadsheetService
         var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Sheet1");
 
-        worksheet.Cell(1, 1).Value = "FirstName";
-        worksheet.Cell(1, 2).Value = "LastName";
-        worksheet.Cell(1, 3).Value = "Organization";
-        worksheet.Cell(1, 4).Value = "Title";
-        worksheet.Cell(1, 5).Value = "StreetAddress";
-        worksheet.Cell(1, 6).Value = "City";
-        worksheet.Cell(1, 7).Value = "Province";
-        worksheet.Cell(1, 8).Value = "PostalCode";
-        worksheet.Cell(1, 9).Value = "Subscribed";
-        worksheet.Cell(1, 10).Value = "Email";
-        worksheet.Cell(1, 11).Value = "Phone";
-        worksheet.Cell(1, 12).Value = "Fax";
-        worksheet.Cell(1, 13).Value = "Website";
-        worksheet.Cell(1, 14).Value = "BedsCount";
-        worksheet.Cell(1, 15).Value = "Address2";
-        worksheet.Cell(1, 16).Value = "Extension";
-        worksheet.Cell(1, 17).Value = "MailingList";
+        //TODO: refactor to use reflection and attributes
+        var props = GetContactPropsWithoutId();
+
+        for (int i = 0; i < props.Count(); i++)
+        {
+            string colName = GetColumnNameFromContactProp(props.ElementAt(i));
+            worksheet.Cell(1, i + 1).Value = colName;
+        }
 
         for (int i = 0; i < contacts.Count(); i++)
         {
-            worksheet.Cell(i + 2, 1).Value = contacts.ElementAt(i).FirstName;
-            worksheet.Cell(i + 2, 2).Value = contacts.ElementAt(i).LastName;
-            worksheet.Cell(i + 2, 3).Value = contacts.ElementAt(i).Organization;
-            worksheet.Cell(i + 2, 4).Value = contacts.ElementAt(i).Title;
-            worksheet.Cell(i + 2, 5).Value = contacts.ElementAt(i).StreetAddress1;
-            worksheet.Cell(i + 2, 6).Value = contacts.ElementAt(i).City;
-            worksheet.Cell(i + 2, 7).Value = contacts.ElementAt(i).Province;
-            worksheet.Cell(i + 2, 8).Value = contacts.ElementAt(i).PostalCode;
-            worksheet.Cell(i + 2, 9).Value = contacts.ElementAt(i).Subscribed;
-            worksheet.Cell(i + 2, 10).Value = contacts.ElementAt(i).Email;
-            worksheet.Cell(i + 2, 11).Value = contacts.ElementAt(i).Phone;
-            worksheet.Cell(i + 2, 12).Value = contacts.ElementAt(i).Fax;
-            worksheet.Cell(i + 2, 13).Value = contacts.ElementAt(i).Website;
-            worksheet.Cell(i + 2, 14).Value = contacts.ElementAt(i).BedsCount;
-            worksheet.Cell(i + 2, 15).Value = contacts.ElementAt(i).Address2;
-            worksheet.Cell(i + 2, 16).Value = contacts.ElementAt(i).Extension;
-            worksheet.Cell(i + 2, 17).Value = contacts.ElementAt(i).MailingList;
+            for (int j = 0; j < props.Count(); j++)
+            {
+                int rowNum = i + 2;
+                int colNum = j + 1;
+                var prop = props.ElementAt(j);
+                Contact contact = contacts.ElementAt(i);
+
+                var propVal = prop.GetValue(contact);
+                string stringVal = propVal == null ? "" : propVal.ToString();
+
+                worksheet.Cell(rowNum, colNum).Value = stringVal;
+            }
         }
 
         using (MemoryStream memStream = new MemoryStream())
