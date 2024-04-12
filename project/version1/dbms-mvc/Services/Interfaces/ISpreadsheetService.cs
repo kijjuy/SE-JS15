@@ -6,4 +6,6 @@ namespace dbms_mvc.Services;
 public interface ISpreadsheetService
 {
     public IEnumerable<Contact> GetContactsFromFile(IFormFile file);
+
+    public byte[] CreateFileFromContacts(IEnumerable<Contact> contacts);
 }
