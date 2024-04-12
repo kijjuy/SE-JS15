@@ -149,12 +149,14 @@ namespace dbms_mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Contacts/Upload
         [Authorize(Roles = "upload, admin")]
         public IActionResult Upload()
         {
             return View();
         }
 
+        // POST: Contact/Upload
         [HttpPost, ActionName("Upload")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "upload, admin")]
