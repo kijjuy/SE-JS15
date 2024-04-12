@@ -119,6 +119,12 @@ public class SpreadsheetService : ISpreadsheetService
         return contact;
     }
 
+    private IEnumerable<PropertyInfo> GetContactPropsWithoutId()
+    {
+        return typeof(Contact)
+          .GetProperties().Where(p => p.Name != nameof(Contact.ContactId));
+    }
+
     private string GetColumnNameFromContactProp(PropertyInfo prop)
     {
         var attributes = prop.GetCustomAttributes(false);
