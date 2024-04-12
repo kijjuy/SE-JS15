@@ -87,15 +87,13 @@ public class SpreadsheetService : ISpreadsheetService
     private Contact CreateContactFromRow(IList<string> colNames, IList<string> row)
     {
         Contact contact = new Contact();
-        var props = contact.GetType().GetProperties().Where(p => p.Name != nameof(Contact.ContactId));
+        var props = GetContactPropsWithoutId();
         foreach (var prop in props)
         {
-            var attributes = prop.GetCustomAttributes(false);
-            var attr = attributes.Where(a => a.GetType() == typeof(SpreadsheetColumnAttribute))
-             .First() as SpreadsheetColumnAttribute;
 
+            string primaryName = GetColumnNameFromContactProp(prop);
 
-            int colNum = colNames.IndexOf(attr.PrimaryName);
+            int colNum = colNames.IndexOf(primaryName);
 
             if (colNum == -1)
             {
