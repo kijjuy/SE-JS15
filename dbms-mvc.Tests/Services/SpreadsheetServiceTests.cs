@@ -22,5 +22,8 @@ public class SpreadsheetServiceTests
         //Arrange
         var contacts = _fixture.CreateMany<Contact>();
         var contact = _fixture.Create<Contact>();
+
+        var file = File.OpenRead("test-spreadsheet-all-valid.xlsx");
     }
+
 }

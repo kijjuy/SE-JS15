@@ -29,4 +29,11 @@
     <ProjectReference Include="..\dbms-mvc\dbms-mvc.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Content Include="Files\**">
+	<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+    </Content> 
+  </ItemGroup>
+
 </Project>
