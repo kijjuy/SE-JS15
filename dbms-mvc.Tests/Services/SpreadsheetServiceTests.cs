@@ -7,13 +7,10 @@ namespace dbms_mvc.Tests.Services;
 [TestClass]
 public class SpreadsheetServiceTests
 {
-    private readonly ISpreadsheetService _spreadsheetService;
     private readonly IFixture _fixture;
 
     public SpreadsheetServiceTests()
     {
-        _spreadsheetService = new SpreadsheetService(null);
-
         _fixture = new Fixture();
     }
 
@@ -21,6 +18,7 @@ public class SpreadsheetServiceTests
     public void GetContactsFromFile()
     {
         //Arrange
+        var spreadsheetService = new SpreadsheetService(null);
         var contacts = _fixture.CreateMany<Contact>();
         var contact = _fixture.Create<Contact>();
 
