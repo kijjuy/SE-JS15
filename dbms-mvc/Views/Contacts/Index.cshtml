@@ -94,8 +94,8 @@
     </table>
 
     <div id="page-buttons">
-	<button class="btn btn-info @prevDisabled">Previous Page</button>
-	<button class="btn btn-info @nextDisabled">Next Page</button>
+	<a asp-action="Index" asp-route-page="@(page - 1)" class="btn btn-info @ViewBag.prevDisabled">Previous Page</a>
+	<a asp-action="Index" asp-route-page="@(page + 1)" class="btn btn-info @ViewBag.nextDisabled">Next Page</a>
     </div>
 
 
