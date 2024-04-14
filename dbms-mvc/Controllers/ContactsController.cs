@@ -26,7 +26,7 @@ namespace dbms_mvc.Controllers
         }
 
         // GET: Contacts
-        public async Task<IActionResult> Index(Contact? searchContact)
+        public async Task<IActionResult> Index(Contact? searchContact, int? page)
         {
             var contacts = await _repository.SearchContacts(searchContact);
             SetSearchViewData(searchContact);
