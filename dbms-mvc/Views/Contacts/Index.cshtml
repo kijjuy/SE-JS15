@@ -2,9 +2,11 @@
 @using dbms_mvc.Models
 
     @{
-    ViewData["Title"] = "Index";
-    var props = typeof(Contact).GetProperties().ToList();
-    props = props.Where(p => p.Name != "ContactId").ToList();
+	ViewData["Title"] = "Index";
+    	var props = typeof(Contact).GetProperties().ToList();
+    	props = props.Where(p => p.Name != "ContactId").ToList();
+
+    	int page = ViewBag.page ?? 1;
     }
 
     <style>
