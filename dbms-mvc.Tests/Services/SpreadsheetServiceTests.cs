@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using AutoFixture;
 using dbms_mvc.Services;
 
@@ -23,7 +24,8 @@ public class SpreadsheetServiceTests
         var contacts = _fixture.CreateMany<Contact>();
         var contact = _fixture.Create<Contact>();
 
-        var file = File.OpenRead("test-spreadsheet-all-valid.xlsx");
+        var file = File.OpenRead("Files/test-spreadsheet-all-valid.xlsx");
+        IFormFile formFile = new FormFile();
     }
 
 }
