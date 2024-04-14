@@ -31,8 +31,56 @@ namespace dbms_mvc.Controllers
         public async Task<IActionResult> Index(Contact? searchContact, int? page)
         {
             var contacts = await _repository.SearchContacts(searchContact);
+
+            var paginatedContacts = PaginateContacts(contacts, page);
+
             SetSearchViewData(searchContact);
-            return View(contacts);
+
+            return View(paginatedContacts);
+        }
+
+        private List<Contact> PaginateContacts(IEnumerable<Contact> contacts, int? pageInput)
+        {
+            int page;
+            if (pageInput == null)
+            {
+                page = 1;
+            }
+            else
+            {
+                page = (int)pageInput;
+            }
+
+            ViewBag.page = page;
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            int maxPage = (contacts.Count() / maxPerPage) + 1;
+            if (page > maxPage)
+            {
+                page = maxPage;
+            }
+
+            ViewBag.prevDisabled = "";
+            ViewBag.nextDisabled = "";
+
+            if (page == 1)
+            {
+                ViewBag.prevDisabled = "disabled";
+            }
+
+            if (page == maxPage)
+            {
+                ViewBag.nextDisabled = "disabled";
+            }
+
+            int startingContact = (page - 1) * maxPerPage;
+            int finalContact = startingContact + maxPerPage;
+
+            return contacts.Skip(startingContact).Take(maxPerPage).ToList();
         }
 
         // GET: Contacts/Details/5
