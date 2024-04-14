@@ -12,6 +12,8 @@ public class SpreadsheetServiceTests
     public SpreadsheetServiceTests()
     {
         _fixture = new Fixture();
+
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
     }
 
     [TestMethod]
