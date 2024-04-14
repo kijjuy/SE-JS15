@@ -37,6 +37,22 @@ public class SpreadsheetServiceTests
         Assert.AreEqual(0, result_invalidColNames.Count());
     }
 
+    [TestMethod]
+    public void CreateFileFromContacts()
+    {
+        //Arrange
+        var spreadsheetService = new SpreadsheetService(null);
+        var contacts = _fixture.CreateMany<Contact>(50);
+        var emptyContacts = new List<Contact>();
+
+        //Act
+        var result = spreadsheetService.CreateFileFromContacts(contacts);
+        var result_empty = spreadsheetService.CreateFileFromContacts(emptyContacts);
+
+        //Assert
+        Stream stream = new MemoryStream(result);
+
+        Assert.AreNotEqual(null, result);
     }
 
 }
