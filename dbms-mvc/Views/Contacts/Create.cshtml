@@ -54,7 +54,10 @@
             </div>
             <div class="form-group">
                 <label asp-for="Subscribed" class="control-label"></label>
-                <input asp-for="Subscribed" class="form-control" />
+		<select asp-for="Subscribed" class="form-select">
+		    <option value="Y">Y</option>
+		    <option value="N">N</option>
+		</select>
                 <span asp-validation-for="Subscribed" class="text-danger"></span>
             </div>
             <div class="form-group">

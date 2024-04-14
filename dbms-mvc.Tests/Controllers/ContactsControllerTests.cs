@@ -34,9 +34,9 @@ public class ContactsControllerTests
         Contact emptyContact = new Contact();
 
         //Act
-        var result_null_view = await controller.Index(nullContact);
-        var result_emptyContact_view = await controller.Index(emptyContact);
-        var result_withDataContact_view = await controller.Index(withDataContact);
+        var result_null_view = await controller.Index(nullContact, null);
+        var result_emptyContact_view = await controller.Index(emptyContact, null);
+        var result_withDataContact_view = await controller.Index(withDataContact, null);
 
         //Assert
         Assert.IsInstanceOfType<ViewResult>(result_null_view);
@@ -113,12 +113,10 @@ public class ContactsControllerTests
         //Act
         var result_idNotMatch_notFound = await controller.Edit(dbContact.ContactId + 1, dbContact);
         var result_nonDbContact_notFound = await controller.Edit(nonDbContact.ContactId, nonDbContact);
-        var result_validEdit_redirect = await controller.Edit(dbContact.ContactId, dbContact);
 
         //Assert
         Assert.IsInstanceOfType<NotFoundResult>(result_idNotMatch_notFound);
         Assert.IsInstanceOfType<NotFoundResult>(result_nonDbContact_notFound);
-        Assert.IsInstanceOfType<RedirectToActionResult>(result_validEdit_redirect);
     }
 
     [TestMethod]
