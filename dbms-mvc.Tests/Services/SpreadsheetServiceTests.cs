@@ -22,8 +22,7 @@ public class SpreadsheetServiceTests
         var contacts = _fixture.CreateMany<Contact>();
         var contact = _fixture.Create<Contact>();
 
-        var file = File.OpenRead("Files/test-spreadsheet-all-valid.xlsx");
-        IFormFile formFile = new FormFile();
+        Stream stream = File.OpenRead("Files/test-spreadsheet-all-valid.xlsx");
     }
 
 }
