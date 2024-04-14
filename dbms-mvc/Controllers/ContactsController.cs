@@ -176,7 +176,7 @@ namespace dbms_mvc.Controllers
                 return View();
             }
 
-            IEnumerable<Contact> newContacts = _spreadsheetService.GetContactsFromFile(file);
+            IEnumerable<Contact> newContacts = _spreadsheetService.GetContactsFromFile(file.OpenReadStream());
 
             IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
 

@@ -5,7 +5,7 @@ namespace dbms_mvc.Services;
 /// </summary>
 public interface ISpreadsheetService
 {
-    public IEnumerable<Contact> GetContactsFromFile(IFormFile file);
+    public IEnumerable<Contact> GetContactsFromFile(Stream stream);
 
     public byte[] CreateFileFromContacts(IEnumerable<Contact> contacts);
 }

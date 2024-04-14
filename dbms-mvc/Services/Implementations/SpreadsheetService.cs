@@ -17,11 +17,10 @@ public class SpreadsheetService : ISpreadsheetService
         _logger = logger;
     }
 
-    public IEnumerable<Contact> GetContactsFromFile(IFormFile file)
+    public IEnumerable<Contact> GetContactsFromFile(Stream stream)
     {
         var contacts = new List<Contact>();
-        var steam = file.OpenReadStream();
-        var reader = ExcelReaderFactory.CreateReader(steam);
+        var reader = ExcelReaderFactory.CreateReader(stream);
 
         reader.Read();
 
@@ -33,6 +32,9 @@ public class SpreadsheetService : ISpreadsheetService
             Contact newContact = CreateContactFromRow(cols, row);
             contacts.Add(newContact);
         }
+
+        reader.Dispose();
+
         return contacts;
     }
 
