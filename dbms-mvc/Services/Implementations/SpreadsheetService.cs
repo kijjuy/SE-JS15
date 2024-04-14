@@ -68,11 +68,14 @@ public class SpreadsheetService : ISpreadsheetService
             }
         }
 
-        using (MemoryStream memStream = new MemoryStream())
-        {
-            workbook.SaveAs(memStream);
-            return memStream.ToArray();
-        }
+        MemoryStream memStream = new MemoryStream();
+        workbook.SaveAs(memStream);
+
+        workbook.Dispose();
+        memStream.Dispose();
+
+        return memStream.ToArray();
+
     }
 
     private IList<string> GetRow(IExcelDataReader reader)
