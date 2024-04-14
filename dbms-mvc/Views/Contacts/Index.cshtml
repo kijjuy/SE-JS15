@@ -10,6 +10,7 @@
     	int page = ViewBag.page ?? 1;
 
 	string prevDisabled = page <= 1 ? "disabled" : "";
+	string nextDisabled = Model.Count() < maxPerPage ? "disabled" : "";
     }
 
     <style>
@@ -97,7 +98,8 @@
     </table>
 
     <div id="page-buttons">
-	<div class="btn btn-info @prevDisabled">Previous Page</div>
+	<button class="btn btn-info @prevDisabled">Previous Page</div>
+	<button class="btn btn-info @nextDisabled">Next Page</div>
     </div>
 
 
