@@ -34,9 +34,9 @@ public class ContactsControllerTests
         Contact emptyContact = new Contact();
 
         //Act
-        var result_null_view = await controller.Index(nullContact);
-        var result_emptyContact_view = await controller.Index(emptyContact);
-        var result_withDataContact_view = await controller.Index(withDataContact);
+        var result_null_view = await controller.Index(nullContact, null);
+        var result_emptyContact_view = await controller.Index(emptyContact, null);
+        var result_withDataContact_view = await controller.Index(withDataContact, null);
 
         //Assert
         Assert.IsInstanceOfType<ViewResult>(result_null_view);
