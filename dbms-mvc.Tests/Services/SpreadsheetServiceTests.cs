@@ -21,10 +21,22 @@ public class SpreadsheetServiceTests
     {
         //Arrange
         var spreadsheetService = new SpreadsheetService(null);
-        var contacts = _fixture.CreateMany<Contact>();
-        var contact = _fixture.Create<Contact>();
 
-        Stream stream = File.OpenRead("Files/test-spreadsheet-all-valid.xlsx");
+        Stream validStream = File.OpenRead("Files/test-spreadsheet-all-valid.xlsx");
+        Stream emptyStream = File.OpenRead("Files/test-spreadsheet-empty.xlsx");
+        Stream invalidColNameStreat = File.OpenRead("Files/test-spreadsheet-invalid-col-names.xlsx");
+
+        //Act
+        var result_allValid_fullList = spreadsheetService.GetContactsFromFile(validStream);
+        var result_emptyFile_emptyList = spreadsheetService.GetContactsFromFile(emptyStream);
+        var result_invalidColNames = spreadsheetService.GetContactsFromFile(invalidColNameStreat);
+
+        //Assert
+        Assert.AreEqual(3, result_allValid_fullList.Count());
+        Assert.AreEqual(0, result_emptyFile_emptyList.Count());
+        Assert.AreEqual(0, result_invalidColNames.Count());
+    }
+
     }
 
 }
