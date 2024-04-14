@@ -19,6 +19,8 @@ namespace dbms_mvc.Controllers
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             };
 
+        private static int maxPerPage = 50;
+
         public ContactsController(IContactsRepository repository, ISpreadsheetService spreadsheetService)
         {
             _repository = repository;

@@ -2,15 +2,11 @@
 @using dbms_mvc.Models
 
     @{
-	int maxPerPage = 50;
 	ViewData["Title"] = "Index";
     	var props = typeof(Contact).GetProperties().ToList();
     	props = props.Where(p => p.Name != "ContactId").ToList();
 
     	int page = ViewBag.page ?? 1;
-
-	string prevDisabled = page <= 1 ? "disabled" : "";
-	string nextDisabled = Model.Count() < maxPerPage ? "disabled" : "";
     }
 
     <style>
