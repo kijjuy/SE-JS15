@@ -2,6 +2,7 @@
 @using dbms_mvc.Models
 
     @{
+	int maxPerPage = 50;
 	ViewData["Title"] = "Index";
     	var props = typeof(Contact).GetProperties().ToList();
     	props = props.Where(p => p.Name != "ContactId").ToList();
