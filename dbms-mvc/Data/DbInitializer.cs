@@ -63,10 +63,6 @@ public static class DbInitializer
             "admin",
         };
 
-        List<string> userRoles = new List<string> {
-            "update",
-            "create",
-        };
         // Create admin User
         List<(ApplicationUser, List<string>)> appUsers = new List<(ApplicationUser, List<string>)> {
             (new ApplicationUser {
@@ -74,11 +70,6 @@ public static class DbInitializer
                 Email = "admin@email.com",
                 EmailConfirmed = true,
             }, adminRoles ),
-            (new ApplicationUser {
-                UserName = "user@email.com",
-                Email = "user@email.com",
-                EmailConfirmed = true,
-            }, userRoles ),
         };
 
         foreach ((ApplicationUser, List<string>) appUser in appUsers)

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using dbms_mvc.Data;
 using dbms_mvc.Repositories;
 using dbms_mvc.Services;
@@ -10,14 +12,29 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        SecretClientOptions kvOptions = new SecretClientOptions()
+        {
+            Retry =
+        {
+        Delay = TimeSpan.FromSeconds(2),
+        MaxDelay = TimeSpan.FromSeconds(16),
+        MaxRetries = 5,
+        Mode = Azure.Core.RetryMode.Exponential
+        }
+        };
+        string kvUri = "https://sm-app-secrets.vault.azure.net";
+
+        var vaultClient = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(), kvOptions);
+
+        var conSrting = vaultClient.GetSecret("db-con-string");
 
         var builder = WebApplication.CreateBuilder(args);
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        var connectionString = conSrting.Value.Value;
         var configurationManager = builder.Configuration;
 
         // Add services to the container.
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+            options.UseSqlServer(connectionString));
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -34,12 +51,15 @@ public class Program
 
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-        //TODO: Setup logging
-
         var app = builder.Build();
 
         //setup DbInitializer
-        var loginSecrets = configurationManager.GetSection("Login").Get<LoginConfig>();
+        var adminPassSecret = vaultClient.GetSecret("AdminPassword").Value;
+        var loginSecrets = new LoginConfig
+        {
+            AdminPassword = adminPassSecret.Value
+        };
+
         using (var scope = app.Services.CreateScope())
         {
             if (loginSecrets == null)
