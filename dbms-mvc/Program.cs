@@ -51,12 +51,15 @@ public class Program
 
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-        //TODO: Setup logging
-
         var app = builder.Build();
 
         //setup DbInitializer
-        var loginSecrets = configurationManager.GetSection("Login").Get<LoginConfig>();
+        var adminPassSecret = vaultClient.GetSecret("AdminPassword").Value;
+        var loginSecrets = new LoginConfig
+        {
+            AdminPassword = adminPassSecret.Value
+        };
+
         using (var scope = app.Services.CreateScope())
         {
             if (loginSecrets == null)
