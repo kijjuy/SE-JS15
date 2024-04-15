@@ -23,6 +23,6 @@ pkgs.mkShell rec {
 
   shellHook = ''
     DOTNET_ROOT="${dotnetPkg}";
-    KEY_VAULT_NAME="sm-database-creds"
+    KEY_VAULT_NAME="sm-app-secrets"
   '';
 }
