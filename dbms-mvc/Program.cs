@@ -12,10 +12,19 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        string keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
-        string kvUri = "https://" + keyVaultName + ".vault.azure.net";
+        SecretClientOptions kvOptions = new SecretClientOptions()
+        {
+            Retry =
+        {
+        Delay = TimeSpan.FromSeconds(2),
+        MaxDelay = TimeSpan.FromSeconds(16),
+        MaxRetries = 5,
+        Mode = Azure.Core.RetryMode.Exponential
+        }
+        };
+        string kvUri = "https://sm-app-secrets.vault.azure.net";
 
-        var vaultClient = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
+        var vaultClient = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(), kvOptions);
 
         var conSrting = vaultClient.GetSecret("db-con-string");
 
@@ -25,7 +34,7 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString));
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
