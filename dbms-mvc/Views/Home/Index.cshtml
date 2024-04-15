@@ -4,12 +4,21 @@
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6 text-center">
-            <h1>Welcome to the Home Page</h1>
-            <div class="mt-4">
-                <a href="Contacts/Upload" class="btn btn-primary btn-lg mr-2">Upload File</a>
-                <a href="Contacts" class="btn btn-primary btn-lg">View Records</a>
-            </div>
+        <div class="options-container text-center">
+	    <div id="contacts-options">
+		<h1>Contact Options</h1>
+            	<div class="mt-4">
+            	    <a href="Contacts/Upload" class="btn btn-primary btn-lg mr-2">Upload File</a>
+            	    <a href="Contacts" class="btn btn-primary btn-lg">View Records</a>
+            	</div>
+	    </div>
+	    @if (User.IsInRole("admin"))
+	    {
+	    <div id="user-options">
+		<h1>User Options</h1>
+		<a asp-controller="Users" asp-action="Index" class="btn btn-primary btn-lg">User Control Center</a>
+	    </div>
+	    }
         </div>
     </div>
 </div>

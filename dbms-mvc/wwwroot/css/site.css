@@ -24,3 +24,7 @@ body {
 #roleButtonSection {
     padding-bottom: 2em;
 }
+
+.options-container > * {
+    padding: 2em;
+}
