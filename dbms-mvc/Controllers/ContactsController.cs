@@ -14,10 +14,15 @@ namespace dbms_mvc.Controllers
 
         private readonly ISpreadsheetService _spreadsheetService;
 
+        private static string xlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+        private static string csvContentType = "text/csv";
+
         private static IEnumerable<string> SupportedContentTypes = new List<string>
-            {
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            };
+        {
+        xlsxContentType,
+        csvContentType
+        };
 
         private static int maxPerPage = 50;
 
@@ -226,8 +231,17 @@ namespace dbms_mvc.Controllers
                 return View();
             }
 
-            IEnumerable<Contact> newContacts = _spreadsheetService.GetContactsFromFile(file.OpenReadStream());
+            IEnumerable<Contact> newContacts = null;
 
+            if (file.ContentType == xlsxContentType)
+            {
+                newContacts = _spreadsheetService.GetContactsFromXlsx(file.OpenReadStream());
+            }
+
+            if (file.ContentType == csvContentType)
+            {
+                newContacts = _spreadsheetService.GetContactsFromCsv(file.OpenReadStream());
+            }
             IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
 
             if (unresolvedMerges.Count() > 0)

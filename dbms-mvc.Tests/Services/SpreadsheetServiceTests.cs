@@ -27,9 +27,9 @@ public class SpreadsheetServiceTests
         Stream invalidColNameStreat = File.OpenRead("Files/test-spreadsheet-invalid-col-names.xlsx");
 
         //Act
-        var result_allValid_fullList = spreadsheetService.GetContactsFromFile(validStream);
-        var result_emptyFile_emptyList = spreadsheetService.GetContactsFromFile(emptyStream);
-        var result_invalidColNames = spreadsheetService.GetContactsFromFile(invalidColNameStreat);
+        var result_allValid_fullList = spreadsheetService.GetContactsFromXlsx(validStream);
+        var result_emptyFile_emptyList = spreadsheetService.GetContactsFromXlsx(emptyStream);
+        var result_invalidColNames = spreadsheetService.GetContactsFromXlsx(invalidColNameStreat);
 
         //Assert
         Assert.AreEqual(3, result_allValid_fullList.Count());

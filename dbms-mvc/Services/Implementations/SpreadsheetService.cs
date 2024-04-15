@@ -17,10 +17,21 @@ public class SpreadsheetService : ISpreadsheetService
         _logger = logger;
     }
 
-    public IEnumerable<Contact> GetContactsFromFile(Stream stream)
+    public IEnumerable<Contact> GetContactsFromCsv(Stream stream)
+    {
+        var reader = ExcelReaderFactory.CreateCsvReader(stream);
+        return GetContactsFromFile(stream, reader);
+    }
+
+    public IEnumerable<Contact> GetContactsFromXlsx(Stream stream)
+    {
+        var reader = ExcelReaderFactory.CreateReader(stream);
+        return GetContactsFromFile(stream, reader);
+    }
+
+    private IEnumerable<Contact> GetContactsFromFile(Stream stream, IExcelDataReader reader)
     {
         var contacts = new List<Contact>();
-        var reader = ExcelReaderFactory.CreateReader(stream);
 
         reader.Read();
 
@@ -110,10 +121,10 @@ public class SpreadsheetService : ISpreadsheetService
 
             if (rowVal.Equals(string.Empty))
             {
-                continue;
+                rowVal = "";
             }
 
-            if (int.TryParse(rowVal, out int result))
+            if (int.TryParse(rowVal, out int result) && prop.GetType() == typeof(int))
             {
                 prop.SetValue(contact, result);
                 continue;
