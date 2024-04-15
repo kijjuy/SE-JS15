@@ -119,17 +119,21 @@ public class SpreadsheetService : ISpreadsheetService
 
             var rowVal = row.ElementAt(colNum);
 
-            if (rowVal.Equals(string.Empty))
+            //If prop is nullable and string is empty
+            bool isNullable = Nullable.GetUnderlyingType(prop.PropertyType) != null;
+            _logger.LogError($"isNullable: {isNullable}");
+            if (isNullable && rowVal == string.Empty)
             {
-                rowVal = "";
+                continue;
             }
 
-            if (int.TryParse(rowVal, out int result) && prop.GetType() == typeof(int))
+            if (int.TryParse(rowVal, out int result) && prop.Name == nameof(Contact.BedsCount))
             {
                 prop.SetValue(contact, result);
                 continue;
             }
 
+            _logger.LogError($"prop name: {prop.Name}");
             prop.SetValue(contact, rowVal);
         }
         return contact;
