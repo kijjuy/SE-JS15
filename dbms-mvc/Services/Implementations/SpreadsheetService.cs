@@ -121,10 +121,10 @@ public class SpreadsheetService : ISpreadsheetService
 
             if (rowVal.Equals(string.Empty))
             {
-                continue;
+                rowVal = "";
             }
 
-            if (int.TryParse(rowVal, out int result))
+            if (int.TryParse(rowVal, out int result) && prop.GetType() == typeof(int))
             {
                 prop.SetValue(contact, result);
                 continue;
