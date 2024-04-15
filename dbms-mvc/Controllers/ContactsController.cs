@@ -260,7 +260,7 @@ namespace dbms_mvc.Controllers
 
                 var removeContact = await _repository.GetContactById(inputModel.ReplaceContactId);
 
-                _repository.DeleteContact(removeContact);
+                await _repository.DeleteContact(removeContact);
             }
 
             return Ok();
