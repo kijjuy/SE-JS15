@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging.ApplicationInsights;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using dbms_mvc.Data;
@@ -42,6 +43,16 @@ public class Program
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders()
                 .AddDefaultUI();
+
+        var appInsightsConString = vaultClient.GetSecret("app-insights-con-string").Value;
+
+        Console.WriteLine(appInsightsConString.Value);
+
+        builder.Logging.AddApplicationInsights(
+            configureTelemetryConfiguration: (config) =>
+                config.ConnectionString = appInsightsConString.Value,
+                configureApplicationInsightsLoggerOptions: (options) => { }
+        );
 
         builder.Services.AddControllersWithViews();
 
