@@ -56,7 +56,7 @@ public class Contact
     public string Organization { get; set; }
 
     [Required]
-    [StringLength(25)]
+    [StringLength(50)]
     [SpreadsheetColumn("Title")]
     public string Title { get; set; }
 
@@ -66,7 +66,7 @@ public class Contact
     public string StreetAddress1 { get; set; }
 
     [Required]
-    [StringLength(25)]
+    [StringLength(50)]
     [SpreadsheetColumn("City")]
     public string City { get; set; }
 
@@ -76,7 +76,7 @@ public class Contact
     public string Province { get; set; }
 
     [Required]
-    [StringLength(6)]
+    [StringLength(7)]
     [SpreadsheetColumn("Postal Code")]
     public string PostalCode { get; set; }
 
@@ -91,14 +91,14 @@ public class Contact
     public string Email { get; set; }
 
     [Required]
-    [StringLength(11)]
+    [StringLength(15)]
     [SpreadsheetColumn("Phone")]
     public string Phone { get; set; }
 
     [SpreadsheetColumn("Home Category")]
     public string? HomeCategory { get; set; }
 
-    [StringLength(11)]
+    [StringLength(15)]
     [SpreadsheetColumn("Fax")]
     public string? Fax { get; set; }
 
