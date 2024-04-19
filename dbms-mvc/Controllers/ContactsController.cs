@@ -174,28 +174,26 @@ namespace dbms_mvc.Controllers
                 return View();
             }
 
-            if (!SupportedContentTypes.Contains(file.ContentType))
+            var supportedContentTypes = SpreadsheetService.SupportedContentTypes;
+            if (!supportedContentTypes.Contains(file.ContentType))
             {
                 //Log error
                 ViewBag.ErrorMessage = "File type is not supported.";
                 return View();
             }
 
-            var stream = file.OpenReadStream();
+            var worksheet = _spreadsheetService.GetWorksheetFromFile(file);
 
-            //_spreadsheetService.CheckColumnsMatch(stream);
+            //var unmappedColumns = _spreadsheetService.GetUnmappedColumnNames(worksheet);
 
-            IEnumerable<Contact> newContacts = null;
+            //if (unmappedColumns.UnmappedColumns.Count() > 0)
+            //{
+            //    _logger.LogInformation($"Columns did not match. Sending manual column mapper to user.");
+            //    return View("MappingPrompt");
+            //}
 
-            if (file.ContentType == xlsxContentType)
-            {
-                newContacts = _spreadsheetService.GetContactsFromXlsx(stream);
-            }
+            var newContacts = _spreadsheetService.GetContactsFromWorksheet(worksheet);
 
-            if (file.ContentType == csvContentType)
-            {
-                newContacts = _spreadsheetService.GetContactsFromCsv(file.OpenReadStream());
-            }
             IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
 
             if (unresolvedMerges.Count() > 0)

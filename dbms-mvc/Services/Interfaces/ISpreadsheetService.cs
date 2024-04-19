@@ -1,3 +1,6 @@
+using ClosedXML.Excel;
+using dbms_mvc.Models;
+
 namespace dbms_mvc.Services;
 
 /// <summary>
@@ -5,9 +8,11 @@ namespace dbms_mvc.Services;
 /// </summary>
 public interface ISpreadsheetService
 {
-    public IEnumerable<Contact> GetContactsFromXlsx(Stream stream);
+    public IXLWorksheet GetWorksheetFromFile(IFormFile file);
 
-    public IEnumerable<Contact> GetContactsFromCsv(Stream stream);
+    public IEnumerable<Contact> GetContactsFromWorksheet(IXLWorksheet worksheet);
+
+    public MappingPromptViewModel GetUnmappedColumnNames(IXLWorksheet worksheet);
 
     public byte[] CreateFileFromContacts(IEnumerable<Contact> contacts);
 }
