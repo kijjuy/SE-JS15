@@ -14,22 +14,15 @@ namespace dbms_mvc.Controllers
 
         private readonly ISpreadsheetService _spreadsheetService;
 
-        private static string xlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
-        private static string csvContentType = "text/csv";
-
-        private static IEnumerable<string> SupportedContentTypes = new List<string>
-        {
-        xlsxContentType,
-        csvContentType
-        };
+        private readonly ILogger<ContactsController> _logger;
 
         private static int maxPerPage = 50;
 
-        public ContactsController(IContactsRepository repository, ISpreadsheetService spreadsheetService)
+        public ContactsController(IContactsRepository repository, ISpreadsheetService spreadsheetService, ILogger<ContactsController> logger)
         {
             _repository = repository;
             _spreadsheetService = spreadsheetService;
+            _logger = logger;
         }
 
         // GET: Contacts
