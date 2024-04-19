@@ -224,6 +224,7 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPost, ActionName("Export")]
+        [Authorize(Roles = "export, admin")]
         public IActionResult Export([FromBody] IList<Contact> contacts)
         {
             //TODO: Handle null properly
