@@ -272,6 +272,11 @@ public class ContactsRepository : IContactsRepository, IDisposable
         return _context.contacts.Any(e => e.ContactId == id);
     }
 
+    public async Task<IEnumerable<Contact>> GetAllContacts()
+    {
+        return await _context.contacts.ToListAsync();
+    }
+
 
     //IDisposable Section
 
