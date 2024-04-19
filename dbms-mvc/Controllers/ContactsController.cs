@@ -188,11 +188,15 @@ namespace dbms_mvc.Controllers
                 return View();
             }
 
+            var stream = file.OpenReadStream();
+
+            //_spreadsheetService.CheckColumnsMatch(stream);
+
             IEnumerable<Contact> newContacts = null;
 
             if (file.ContentType == xlsxContentType)
             {
-                newContacts = _spreadsheetService.GetContactsFromXlsx(file.OpenReadStream());
+                newContacts = _spreadsheetService.GetContactsFromXlsx(stream);
             }
 
             if (file.ContentType == csvContentType)
