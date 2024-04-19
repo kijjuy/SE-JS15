@@ -265,6 +265,14 @@ namespace dbms_mvc.Controllers
             }
         }
 
+        private string GetDateString()
+        {
+            DateTime date = DateTime.Now;
+            string dateString =
+              $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
+            return dateString;
+        }
+
         private List<Contact> PaginateContacts(IEnumerable<Contact> contacts, int? pageInput)
         {
             int page;
