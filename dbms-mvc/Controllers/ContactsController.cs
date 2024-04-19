@@ -44,49 +44,6 @@ namespace dbms_mvc.Controllers
             return View(paginatedContacts);
         }
 
-        private List<Contact> PaginateContacts(IEnumerable<Contact> contacts, int? pageInput)
-        {
-            int page;
-            if (pageInput == null)
-            {
-                page = 1;
-            }
-            else
-            {
-                page = (int)pageInput;
-            }
-
-            ViewBag.page = page;
-
-            if (page < 1)
-            {
-                page = 1;
-            }
-
-            int maxPage = (contacts.Count() / maxPerPage) + 1;
-            if (page > maxPage)
-            {
-                page = maxPage;
-            }
-
-            ViewBag.prevDisabled = "";
-            ViewBag.nextDisabled = "";
-
-            if (page == 1)
-            {
-                ViewBag.prevDisabled = "disabled";
-            }
-
-            if (page == maxPage)
-            {
-                ViewBag.nextDisabled = "disabled";
-            }
-
-            int startingContact = (page - 1) * maxPerPage;
-            int finalContact = startingContact + maxPerPage;
-
-            return contacts.Skip(startingContact).Take(maxPerPage).ToList();
-        }
 
         // GET: Contacts/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -303,12 +260,48 @@ namespace dbms_mvc.Controllers
             }
         }
 
-        private string GetDateString()
+        private List<Contact> PaginateContacts(IEnumerable<Contact> contacts, int? pageInput)
         {
-            DateTime date = DateTime.Now;
-            string dateString =
-              $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
-            return dateString;
+            int page;
+            if (pageInput == null)
+            {
+                page = 1;
+            }
+            else
+            {
+                page = (int)pageInput;
+            }
+
+            ViewBag.page = page;
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            int maxPage = (contacts.Count() / maxPerPage) + 1;
+            if (page > maxPage)
+            {
+                page = maxPage;
+            }
+
+            ViewBag.prevDisabled = "";
+            ViewBag.nextDisabled = "";
+
+            if (page == 1)
+            {
+                ViewBag.prevDisabled = "disabled";
+            }
+
+            if (page == maxPage)
+            {
+                ViewBag.nextDisabled = "disabled";
+            }
+
+            int startingContact = (page - 1) * maxPerPage;
+            int finalContact = startingContact + maxPerPage;
+
+            return contacts.Skip(startingContact).Take(maxPerPage).ToList();
         }
     }
 }
