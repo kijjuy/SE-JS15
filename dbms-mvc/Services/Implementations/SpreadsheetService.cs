@@ -41,6 +41,7 @@ public class SpreadsheetService : ISpreadsheetService
 
         if (file.ContentType == SpreadsheetService.csvContentType)
         {
+            //TODO: implement csv support
             throw new NotImplementedException();
             //var reader = ExcelReaderFactory.CreateCsvReader(stream);
             //return GetWorkbookFromCsv(reader, stream);
@@ -57,7 +58,51 @@ public class SpreadsheetService : ISpreadsheetService
 
     public MappingPromptViewModel GetUnmappedColumnNames(IXLWorksheet worksheet)
     {
-        throw new NotImplementedException();
+        MappingPromptViewModel mappingPrompt = new MappingPromptViewModel();
+        var colNames = worksheet.FirstRow().Cells();
+        var props = GetContactPropsWithoutId();
+        var colsToSkip = new List<string>
+        {
+        "Combined Name"
+        };
+        foreach (var col in colNames)
+        {
+            string colString = col.GetString();
+            if (colsToSkip.Contains(colString))
+            {
+                continue;
+            }
+
+            var matchingProp = GetMatchingProp(props, colString);
+
+            if (matchingProp == null)
+            {
+                mappingPrompt.UnmappedColumns.Add(colString);
+                continue;
+            }
+            props = props.Where(p => !p.Name.Equals(matchingProp.Name));
+        }
+
+        var availableProps = new List<string>();
+        foreach (var prop in props)
+        {
+            if (prop != null)
+            {
+                availableProps.Add(prop.Name);
+            }
+        }
+        mappingPrompt.AvailableProperties = availableProps;
+        return mappingPrompt;
+    }
+
+    private PropertyInfo? GetMatchingProp(IEnumerable<PropertyInfo> props, string matchName)
+    {
+        return props.FirstOrDefault(p =>
+        {
+            var attribute = p.GetCustomAttribute<SpreadsheetColumnAttribute>();
+            return ((attribute != null) && attribute.PrimaryName == matchName);
+        });
+
     }
 
     public IEnumerable<Contact> GetContactsFromWorksheet(IXLWorksheet worksheet)
