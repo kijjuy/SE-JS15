@@ -1,0 +1,6 @@
+@model MappingPromptViewModel
+
+@foreach (var unmappedCol in Model.UnmappedColumns)
+{
+    <p>@unmappedCol</p>
+}
