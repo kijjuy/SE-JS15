@@ -5,6 +5,7 @@ using dbms_mvc.Controllers;
 using dbms_mvc.Models;
 using dbms_mvc.Repositories;
 using dbms_mvc.Data;
+using dbms_mvc.Services;
 
 
 [TestClass]
@@ -12,6 +13,7 @@ public class ContactsControllerTests
 {
     private readonly Fixture _fixture;
     private readonly IContactsRepository _repository;
+    private readonly ISpreadsheetService _service;
 
     public ContactsControllerTests()
     {
@@ -23,6 +25,7 @@ public class ContactsControllerTests
 
         _fixture = new Fixture();
         _repository = new ContactsRepository(contact);
+        _service = new SpreadsheetService(null);
     }
 
     [TestMethod]
@@ -155,7 +158,7 @@ public class ContactsControllerTests
 
     private void CreateControllerAndContact(out ContactsController controller, out Contact contact)
     {
-        controller = new ContactsController(_repository, null);
+        controller = new ContactsController(_repository, _service, null);
         contact = _fixture.Create<Contact>();
     }
 }
