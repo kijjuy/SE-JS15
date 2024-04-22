@@ -184,13 +184,13 @@ namespace dbms_mvc.Controllers
 
             var worksheet = _spreadsheetService.GetWorksheetFromFile(file);
 
-            //var unmappedColumns = _spreadsheetService.GetUnmappedColumnNames(worksheet);
+            var unmappedColumns = _spreadsheetService.GetUnmappedColumnNames(worksheet);
 
-            //if (unmappedColumns.UnmappedColumns.Count() > 0)
-            //{
-            //    _logger.LogInformation($"Columns did not match. Sending manual column mapper to user.");
-            //    return View("MappingPrompt");
-            //}
+            if (unmappedColumns.UnmappedColumns.Count() > 0)
+            {
+                _logger.LogInformation($"Columns did not match. Sending manual column mapper to user.");
+                return View("MappingPrompt", unmappedColumns);
+            }
 
             var newContacts = _spreadsheetService.GetContactsFromWorksheet(worksheet);
 
