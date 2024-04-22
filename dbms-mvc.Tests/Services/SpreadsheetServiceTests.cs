@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using AutoFixture;
+using Moq;
+using ClosedXML.Excel;
 using dbms_mvc.Services;
 
 namespace dbms_mvc.Tests.Services;
@@ -17,24 +19,25 @@ public class SpreadsheetServiceTests
     }
 
     [TestMethod]
-    public void GetContactsFromFile()
+    [DataRow("Files/test-spreadsheet-all-valid.xlsx")]
+    [DataRow("Files/test-spreadsheet-empty.xlsx")]
+    [DataRow("Files/test-spreadsheet-invalid-col-names.xlsx")]
+    public void GetWorksheetFromFile(string fileDir)
     {
         //Arrange
         var spreadsheetService = new SpreadsheetService(null);
+        var mockFormFile = new Mock<IFormFile>();
 
-        Stream validStream = File.OpenRead("Files/test-spreadsheet-all-valid.xlsx");
-        Stream emptyStream = File.OpenRead("Files/test-spreadsheet-empty.xlsx");
-        Stream invalidColNameStreat = File.OpenRead("Files/test-spreadsheet-invalid-col-names.xlsx");
+        Stream stream = File.OpenRead(fileDir);
+
+        mockFormFile.Setup(f => f.OpenReadStream()).Returns(stream);
+        mockFormFile.Setup(f => f.ContentType).Returns(SpreadsheetService.xlsxContentType);
 
         //Act
-        var result_allValid_fullList = spreadsheetService.GetContactsFromXlsx(validStream);
-        var result_emptyFile_emptyList = spreadsheetService.GetContactsFromXlsx(emptyStream);
-        var result_invalidColNames = spreadsheetService.GetContactsFromXlsx(invalidColNameStreat);
+        var result = spreadsheetService.GetWorksheetFromFile(mockFormFile.Object);
 
         //Assert
-        Assert.AreEqual(3, result_allValid_fullList.Count());
-        Assert.AreEqual(0, result_emptyFile_emptyList.Count());
-        Assert.AreEqual(0, result_invalidColNames.Count());
+        Assert.IsInstanceOfType<IXLWorksheet>(result);
     }
 
     [TestMethod]
