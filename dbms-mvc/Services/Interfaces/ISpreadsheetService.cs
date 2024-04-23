@@ -10,6 +10,8 @@ public interface ISpreadsheetService
 {
     public IXLWorksheet GetWorksheetFromFile(IFormFile file);
 
+    public IXLWorksheet SetMappedColumns(IXLWorksheet worksheet, Dictionary<string, string> mappings);
+
     public IEnumerable<Contact> GetContactsFromWorksheet(IXLWorksheet worksheet);
 
     public MappingPromptViewModel GetUnmappedColumnNames(IXLWorksheet worksheet);

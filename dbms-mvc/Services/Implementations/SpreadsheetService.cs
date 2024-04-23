@@ -50,12 +50,6 @@ public class SpreadsheetService : ISpreadsheetService
         throw new NotImplementedException();
     }
 
-    private IXLWorksheet CreateWorksheet()
-    {
-        var workbook = new XLWorkbook();
-        return workbook.AddWorksheet(SpreadsheetService.WorksheetName);
-    }
-
     public MappingPromptViewModel GetUnmappedColumnNames(IXLWorksheet worksheet)
     {
         MappingPromptViewModel mappingPrompt = new MappingPromptViewModel();
@@ -88,21 +82,29 @@ public class SpreadsheetService : ISpreadsheetService
         {
             if (prop != null)
             {
-                availableProps.Add(prop.Name);
+                string propTitle = prop.GetCustomAttribute<SpreadsheetColumnAttribute>().PrimaryName;
+                availableProps.Add(propTitle);
             }
         }
         mappingPrompt.AvailableProperties = availableProps;
         return mappingPrompt;
     }
 
-    private PropertyInfo? GetMatchingProp(IEnumerable<PropertyInfo> props, string matchName)
+    public IXLWorksheet SetMappedColumns(IXLWorksheet worksheet, Dictionary<string, string> mappings)
     {
-        return props.FirstOrDefault(p =>
+        var firstRow = worksheet.FirstRow();
+        for (int i = 1; i < firstRow.CellCount(); i++)
         {
-            var attribute = p.GetCustomAttribute<SpreadsheetColumnAttribute>();
-            return ((attribute != null) && attribute.PrimaryName == matchName);
-        });
-
+            var cell = firstRow.Cell(i);
+            string cellVal = cell.GetValue<string>();
+            if (mappings.Keys.Contains(cellVal))
+            {
+                string mapping = mappings[cellVal];
+                cell.SetValue(mapping);
+                _logger.LogInformation($"Changed worksheet column cell from: {cellVal} to: {mapping}");
+            }
+        }
+        return worksheet;
     }
 
     public IEnumerable<Contact> GetContactsFromWorksheet(IXLWorksheet worksheet)
@@ -199,5 +201,21 @@ public class SpreadsheetService : ISpreadsheetService
         var attribute = attributes
           .Where(a => a.GetType() == typeof(SpreadsheetColumnAttribute)).First() as SpreadsheetColumnAttribute;
         return attribute.PrimaryName;
+    }
+
+    private PropertyInfo? GetMatchingProp(IEnumerable<PropertyInfo> props, string matchName)
+    {
+        return props.FirstOrDefault(p =>
+        {
+            var attribute = p.GetCustomAttribute<SpreadsheetColumnAttribute>();
+            return ((attribute != null) && attribute.PrimaryName == matchName);
+        });
+
+    }
+
+    private IXLWorksheet CreateWorksheet()
+    {
+        var workbook = new XLWorkbook();
+        return workbook.AddWorksheet(SpreadsheetService.WorksheetName);
     }
 }

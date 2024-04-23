@@ -80,6 +80,8 @@ public class Program
 
         builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
 
+        builder.Services.AddMemoryCache();
+
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
         var app = builder.Build();
