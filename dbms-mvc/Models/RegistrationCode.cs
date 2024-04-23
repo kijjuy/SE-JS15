@@ -12,12 +12,9 @@ public class RegistrationCode
 
     public DateTime Expiration { get; set; }
 
-    //TODO: Add email of user that created RegistrationCode
-
     public RegistrationCode()
     {
         Token = Guid.NewGuid();
-        //TODO: Do something with this Expiration
         Expiration = CreateExpirationDate();
     }
 

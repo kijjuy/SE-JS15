@@ -154,7 +154,6 @@ public class SpreadsheetService : ISpreadsheetService
         var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Sheet1");
 
-        //TODO: refactor to use reflection and attributes
         var props = GetContactPropsWithoutId();
 
         for (int i = 0; i < props.Count(); i++)

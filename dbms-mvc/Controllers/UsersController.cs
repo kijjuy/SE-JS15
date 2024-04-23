@@ -182,7 +182,6 @@ namespace dbms_mvc.Controllers
             if (appUser.Equals(loggedInUser))
             {
                 _logger.LogWarning($"User with id: {loggedInUser.Id} attempted to delete their own account.");
-                //TODO: create class/struct for error and success messages
                 var errorMessage = new
                 {
                     status = "error",
