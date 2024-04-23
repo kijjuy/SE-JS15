@@ -1,0 +1,39 @@
+@model MappingPromptViewModel
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <p class="text-warning">@ViewBag.ErrorMessage</p>
+}
+
+<h3>The following column names could not be matched to the correct contact information.</h3>
+<p>Please manually select the matching contact property for each column name:</p>
+<form asp-action="UpdateMappedColumns">
+    <table class="table table-striped table-hover table-bordered">
+	<thead> 
+	@foreach (var unmappedCol in Model.UnmappedColumns)
+    	{
+    	    <th id="header-@unmappedCol">
+    	        @unmappedCol
+    	    </th>
+    	}
+	</thead>
+	<tbody>
+	@foreach (var unmappedCol in Model.UnmappedColumns)
+    	{
+
+    	    <td id="option-@unmappedCol">
+		<select asp-for="InputModel.ColumnMappings[unmappedCol]" class="form-select" id="select-@unmappedCol">
+    	        @foreach (var availableProp in Model.AvailableProperties)
+    	        {
+    	    	<option value="@availableProp">
+    	    	    @availableProp
+    	    	</option>
+    	        }
+    	        </select>    
+    	    </td>
+    	}
+	</tbody>
+    </table>
+    <input asp-for="InputModel.FileId" type="hidden" value="@Model.FileId">
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

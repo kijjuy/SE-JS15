@@ -11,7 +11,7 @@ namespace dbms_mvc;
 
 public class Program
 {
-    public static void Main(string[] args)
+    private static void ConfigureRelease(ref WebApplicationBuilder builder)
     {
         SecretClientOptions kvOptions = new SecretClientOptions()
         {
@@ -25,17 +25,46 @@ public class Program
         };
         string kvUri = "https://sm-app-secrets.vault.azure.net";
 
-        var vaultClient = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(), kvOptions);
+        var secretClient = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(), kvOptions);
 
-        var conSrting = vaultClient.GetSecret("db-con-string");
+        var conStringSecret = secretClient.GetSecret("db-con-string");
+        var connectionString = conStringSecret.Value.Value;
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(connectionString));
+
+        var appInsightsConString = secretClient.GetSecret("app-insights-con-string").Value;
+
+        builder.Logging.AddApplicationInsights(
+            configureTelemetryConfiguration: (config) =>
+                config.ConnectionString = appInsightsConString.Value,
+                configureApplicationInsightsLoggerOptions: (options) => { }
+        );
+    }
+
+    private static void ConfigureDevelopment(ref WebApplicationBuilder builder)
+    {
+        var connectionStringSecret = builder.Configuration.GetSection("ConnectionStrings").Get<ConnectionStringConfig>();
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(connectionStringSecret.Docker));
+    }
+
+    public static void Main(string[] args)
+    {
 
         var builder = WebApplication.CreateBuilder(args);
-        var connectionString = conSrting.Value.Value;
         var configurationManager = builder.Configuration;
 
         // Add services to the container.
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        if (builder.Environment.IsProduction())
+        {
+            ConfigureRelease(ref builder);
+        }
+        else
+        {
+            ConfigureDevelopment(ref builder);
+        }
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -44,15 +73,6 @@ public class Program
             .AddDefaultTokenProviders()
                 .AddDefaultUI();
 
-        var appInsightsConString = vaultClient.GetSecret("app-insights-con-string").Value;
-
-        Console.WriteLine(appInsightsConString.Value);
-
-        builder.Logging.AddApplicationInsights(
-            configureTelemetryConfiguration: (config) =>
-                config.ConnectionString = appInsightsConString.Value,
-                configureApplicationInsightsLoggerOptions: (options) => { }
-        );
 
         builder.Services.AddControllersWithViews();
 
@@ -60,16 +80,20 @@ public class Program
 
         builder.Services.AddScoped<ISpreadsheetService, SpreadsheetService>();
 
+        builder.Services.AddMemoryCache();
+
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
         var app = builder.Build();
 
         //setup DbInitializer
-        var adminPassSecret = vaultClient.GetSecret("AdminPassword").Value;
-        var loginSecrets = new LoginConfig
-        {
-            AdminPassword = adminPassSecret.Value
-        };
+        //var adminPassSecret = vaultClient.GetSecret("AdminPassword").Value;
+        //var loginSecrets = new LoginConfig
+        //{
+        //    AdminPassword = adminPassSecret.Value
+        //};
+
+        var loginSecrets = configurationManager.GetSection("Login").Get<LoginConfig>();
 
         using (var scope = app.Services.CreateScope())
         {

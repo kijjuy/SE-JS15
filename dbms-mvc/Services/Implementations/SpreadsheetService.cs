@@ -12,39 +12,139 @@ public class SpreadsheetService : ISpreadsheetService
 {
     private readonly ILogger<SpreadsheetService> _logger;
 
+    public static string xlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    public static string csvContentType = "text/csv";
+
+    public static IEnumerable<string> SupportedContentTypes = new List<string>
+        {
+        xlsxContentType,
+        csvContentType
+        };
+
+    public const string WorksheetName = "Sheet1";
+
     public SpreadsheetService(ILogger<SpreadsheetService> logger)
     {
         _logger = logger;
     }
 
-    public IEnumerable<Contact> GetContactsFromCsv(Stream stream)
+    public IXLWorksheet GetWorksheetFromFile(IFormFile file)
     {
-        var reader = ExcelReaderFactory.CreateCsvReader(stream);
-        return GetContactsFromFile(stream, reader);
+        var stream = file.OpenReadStream();
+
+        if (file.ContentType == SpreadsheetService.xlsxContentType)
+        {
+            var workbook = new XLWorkbook(stream);
+            return workbook.Worksheet(SpreadsheetService.WorksheetName);
+        }
+
+        if (file.ContentType == SpreadsheetService.csvContentType)
+        {
+            //TODO: implement csv support
+            throw new NotImplementedException();
+            //var reader = ExcelReaderFactory.CreateCsvReader(stream);
+            //return GetWorkbookFromCsv(reader, stream);
+        }
+
+        throw new NotImplementedException();
     }
 
-    public IEnumerable<Contact> GetContactsFromXlsx(Stream stream)
+    public MappingPromptViewModel GetUnmappedColumnNames(IXLWorksheet worksheet)
     {
-        var reader = ExcelReaderFactory.CreateReader(stream);
-        return GetContactsFromFile(stream, reader);
+        MappingPromptViewModel mappingPrompt = new MappingPromptViewModel();
+        var colNames = worksheet.FirstRow().Cells();
+        var props = GetContactPropsWithoutId();
+        var colsToSkip = new List<string>
+        {
+        "Combined Name"
+        };
+        foreach (var col in colNames)
+        {
+            string colString = col.GetString();
+            if (colsToSkip.Contains(colString))
+            {
+                continue;
+            }
+
+            var matchingProp = GetMatchingProp(props, colString);
+
+            if (matchingProp == null)
+            {
+                mappingPrompt.UnmappedColumns.Add(colString);
+                continue;
+            }
+            props = props.Where(p => !p.Name.Equals(matchingProp.Name));
+        }
+
+        var availableProps = new List<string>();
+        foreach (var prop in props)
+        {
+            if (prop != null)
+            {
+                string propTitle = prop.GetCustomAttribute<SpreadsheetColumnAttribute>().PrimaryName;
+                availableProps.Add(propTitle);
+            }
+        }
+        mappingPrompt.AvailableProperties = availableProps;
+        return mappingPrompt;
     }
 
-    private IEnumerable<Contact> GetContactsFromFile(Stream stream, IExcelDataReader reader)
+    public IXLWorksheet SetMappedColumns(IXLWorksheet worksheet, Dictionary<string, string> mappings)
+    {
+        var firstRow = worksheet.FirstRow();
+        for (int i = 1; i < firstRow.CellCount(); i++)
+        {
+            var cell = firstRow.Cell(i);
+            string cellVal = cell.GetValue<string>();
+            if (mappings.Keys.Contains(cellVal))
+            {
+                string mapping = mappings[cellVal];
+                cell.SetValue(mapping);
+                _logger.LogInformation($"Changed worksheet column cell from: {cellVal} to: {mapping}");
+            }
+        }
+        return worksheet;
+    }
+
+    public IEnumerable<Contact> GetContactsFromWorksheet(IXLWorksheet worksheet)
     {
         var contacts = new List<Contact>();
 
-        reader.Read();
-
-        var cols = GetRow(reader);
-
-        while (reader.Read())
+        //Iterate over rows
+        for (int row = 2; row <= worksheet.Rows().Count(); row++)
         {
-            var row = GetRow(reader);
-            Contact newContact = CreateContactFromRow(cols, row);
-            contacts.Add(newContact);
-        }
+            //Iterate over each col in rows
+            Contact contact = new Contact();
+            var props = contact.GetType().GetProperties();
 
-        reader.Dispose();
+            for (int col = 1; col <= worksheet.Columns().Count(); col++)
+            {
+                string colName = worksheet.Row(1).Cell(col).GetText();
+                string colVal = worksheet.Row(row).Cell(col).GetValue<string>();
+
+                var prop = props.FirstOrDefault(p =>
+        {
+            var attribute = p.GetCustomAttribute<SpreadsheetColumnAttribute>();
+            return attribute != null && attribute.PrimaryName == colName;
+        });
+                if (prop == null || colVal == string.Empty)
+                {
+                    continue;
+                }
+
+                bool isInt = (prop.PropertyType == typeof(int) || prop.PropertyType == typeof(int?));
+                if (isInt && int.TryParse(colVal, out int intVal))
+                {
+                    prop.SetValue(contact, intVal);
+                    continue;
+                }
+
+                prop.SetValue(contact, colVal);
+
+            }
+            contacts.Add(contact);
+        }
 
         return contacts;
     }
@@ -89,56 +189,6 @@ public class SpreadsheetService : ISpreadsheetService
 
     }
 
-    private IList<string> GetRow(IExcelDataReader reader)
-    {
-        var cols = new List<string>();
-        for (int i = 0; i < reader.FieldCount; i++)
-        {
-            var val = reader.GetValue(i) ?? string.Empty;
-            cols.Add(val.ToString());
-        }
-        return cols;
-    }
-
-    private Contact CreateContactFromRow(IList<string> colNames, IList<string> row)
-    {
-        Contact contact = new Contact();
-        var props = GetContactPropsWithoutId();
-        foreach (var prop in props)
-        {
-
-            string primaryName = GetColumnNameFromContactProp(prop);
-
-            int colNum = colNames.IndexOf(primaryName);
-
-            if (colNum == -1)
-            {
-                //TODO: resolve mismatch colName here
-                continue;
-            }
-
-            var rowVal = row.ElementAt(colNum);
-
-            //If prop is nullable and string is empty
-            bool isNullable = Nullable.GetUnderlyingType(prop.PropertyType) != null;
-            _logger.LogError($"isNullable: {isNullable}");
-            if (isNullable && rowVal == string.Empty)
-            {
-                continue;
-            }
-
-            if (int.TryParse(rowVal, out int result) && prop.Name == nameof(Contact.BedsCount))
-            {
-                prop.SetValue(contact, result);
-                continue;
-            }
-
-            _logger.LogError($"prop name: {prop.Name}");
-            prop.SetValue(contact, rowVal);
-        }
-        return contact;
-    }
-
     private IEnumerable<PropertyInfo> GetContactPropsWithoutId()
     {
         return typeof(Contact)
@@ -151,5 +201,21 @@ public class SpreadsheetService : ISpreadsheetService
         var attribute = attributes
           .Where(a => a.GetType() == typeof(SpreadsheetColumnAttribute)).First() as SpreadsheetColumnAttribute;
         return attribute.PrimaryName;
+    }
+
+    private PropertyInfo? GetMatchingProp(IEnumerable<PropertyInfo> props, string matchName)
+    {
+        return props.FirstOrDefault(p =>
+        {
+            var attribute = p.GetCustomAttribute<SpreadsheetColumnAttribute>();
+            return ((attribute != null) && attribute.PrimaryName == matchName);
+        });
+
+    }
+
+    private IXLWorksheet CreateWorksheet()
+    {
+        var workbook = new XLWorkbook();
+        return workbook.AddWorksheet(SpreadsheetService.WorksheetName);
     }
 }

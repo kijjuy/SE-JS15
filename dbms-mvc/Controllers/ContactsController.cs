@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
+using ClosedXML.Excel;
 using dbms_mvc.Models;
 using dbms_mvc.Repositories;
 using dbms_mvc.Services;
@@ -14,22 +16,18 @@ namespace dbms_mvc.Controllers
 
         private readonly ISpreadsheetService _spreadsheetService;
 
-        private static string xlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        private readonly IMemoryCache _cache;
 
-        private static string csvContentType = "text/csv";
-
-        private static IEnumerable<string> SupportedContentTypes = new List<string>
-        {
-        xlsxContentType,
-        csvContentType
-        };
+        private readonly ILogger<ContactsController> _logger;
 
         private static int maxPerPage = 50;
 
-        public ContactsController(IContactsRepository repository, ISpreadsheetService spreadsheetService)
+        public ContactsController(IContactsRepository repository, ISpreadsheetService spreadsheetService, IMemoryCache cache, ILogger<ContactsController> logger)
         {
             _repository = repository;
             _spreadsheetService = spreadsheetService;
+            _cache = cache;
+            _logger = logger;
         }
 
         // GET: Contacts
@@ -44,49 +42,6 @@ namespace dbms_mvc.Controllers
             return View(paginatedContacts);
         }
 
-        private List<Contact> PaginateContacts(IEnumerable<Contact> contacts, int? pageInput)
-        {
-            int page;
-            if (pageInput == null)
-            {
-                page = 1;
-            }
-            else
-            {
-                page = (int)pageInput;
-            }
-
-            ViewBag.page = page;
-
-            if (page < 1)
-            {
-                page = 1;
-            }
-
-            int maxPage = (contacts.Count() / maxPerPage) + 1;
-            if (page > maxPage)
-            {
-                page = maxPage;
-            }
-
-            ViewBag.prevDisabled = "";
-            ViewBag.nextDisabled = "";
-
-            if (page == 1)
-            {
-                ViewBag.prevDisabled = "disabled";
-            }
-
-            if (page == maxPage)
-            {
-                ViewBag.nextDisabled = "disabled";
-            }
-
-            int startingContact = (page - 1) * maxPerPage;
-            int finalContact = startingContact + maxPerPage;
-
-            return contacts.Skip(startingContact).Take(maxPerPage).ToList();
-        }
 
         // GET: Contacts/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -224,24 +179,108 @@ namespace dbms_mvc.Controllers
                 return View();
             }
 
-            if (!SupportedContentTypes.Contains(file.ContentType))
+            var supportedContentTypes = SpreadsheetService.SupportedContentTypes;
+            if (!supportedContentTypes.Contains(file.ContentType))
             {
                 //Log error
                 ViewBag.ErrorMessage = "File type is not supported.";
                 return View();
             }
 
-            IEnumerable<Contact> newContacts = null;
+            var worksheet = _spreadsheetService.GetWorksheetFromFile(file);
 
-            if (file.ContentType == xlsxContentType)
+            var unmappedColumns = _spreadsheetService.GetUnmappedColumnNames(worksheet);
+
+            if (unmappedColumns.UnmappedColumns.Count() > 0)
             {
-                newContacts = _spreadsheetService.GetContactsFromXlsx(file.OpenReadStream());
+                _logger.LogInformation($"Columns did not match. Sending manual column mapper to user.");
+
+                var cacheOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(1));
+                Guid worksheetId = Guid.NewGuid();
+                unmappedColumns.FileId = worksheetId;
+                _cache.Set(worksheetId, worksheet, cacheOptions);
+
+                //Set keys of dictionary
+                Dictionary<string, string> colKeys = unmappedColumns.UnmappedColumns.ToDictionary(col => col, _ => string.Empty);
+                unmappedColumns.InputModel.ColumnMappings = colKeys;
+
+                _logger.LogInformation($"Count of UnmappedColumns: {unmappedColumns.InputModel.ColumnMappings.Count()}");
+
+                _logger.LogInformation($"Created memory cache item with id: {unmappedColumns.FileId}");
+                return View("MappingPrompt", unmappedColumns);
+            }
+            return await HandleValidWorksheet(worksheet);
+
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "upload, admin")]
+        public async Task<IActionResult> UpdateMappedColumns([FromForm] MappingPromptViewModel viewModel)
+        {
+            var inputModel = viewModel.InputModel;
+            string serverErrorMessage = "Server error while attempting to load uploaded file. Please try again, or contact an administrator if this error persists.";
+
+            List<string> usedColNames = new List<string>();
+            foreach (var selectedProp in inputModel.ColumnMappings)
+            {
+                if (usedColNames.Contains(selectedProp.Value))
+                {
+                    ViewBag.ErrorMessage = "You cannot select a property name to map to more than once.";
+                    return View("MappingPrompt", viewModel);
+                }
+                usedColNames.Add(selectedProp.Value);
             }
 
-            if (file.ContentType == csvContentType)
+            if (inputModel.FileId == null)
             {
-                newContacts = _spreadsheetService.GetContactsFromCsv(file.OpenReadStream());
+                _logger.LogError($"RequestId: {HttpContext.TraceIdentifier}\n"
+                    + $"MappingPromptInputModel.FileId was set to null when entering UpdateMappedColumns method.");
+                var error = new ErrorViewModel(HttpContext.TraceIdentifier, serverErrorMessage);
+                return View("Error", error);
             }
+
+            var cacheItem = _cache.Get(inputModel.FileId);
+            if (cacheItem == null)
+            {
+                _logger.LogError($"RequestId: {HttpContext.TraceIdentifier}\n"
+                    + $"Attempted to find cache item with id: {inputModel.FileId}, but could not.");
+                var error = new ErrorViewModel(HttpContext.TraceIdentifier, serverErrorMessage);
+                return View("Error", error);
+            }
+
+            IXLWorksheet worksheet;
+
+            try
+            {
+                worksheet = cacheItem as IXLWorksheet;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"RequestId: {HttpContext.TraceIdentifier}\n"
+            + $"Could not convert memory cache item to IXLWorksheet.\n"
+            + $"Exception: {e}");
+                var error = new ErrorViewModel(HttpContext.TraceIdentifier, serverErrorMessage);
+                return View("Error", error);
+            }
+
+            if (worksheet == null)
+            {
+                _logger.LogError($"RequestId: {HttpContext.TraceIdentifier}\n"
+                    + $"worksheet was null after getting it from memory cache.");
+                var error = new ErrorViewModel(HttpContext.TraceIdentifier, serverErrorMessage);
+                return View("Error", error);
+            }
+
+            var mappings = inputModel.ColumnMappings;
+            worksheet = _spreadsheetService.SetMappedColumns(worksheet, mappings);
+
+            return await HandleValidWorksheet(worksheet);
+        }
+
+        private async Task<IActionResult> HandleValidWorksheet(IXLWorksheet worksheet)
+        {
+            var newContacts = _spreadsheetService.GetContactsFromWorksheet(worksheet);
+
             IEnumerable<MergeConflictViewModel> unresolvedMerges = await _repository.GetUploadMergeConflicts(newContacts);
 
             if (unresolvedMerges.Count() > 0)
@@ -267,6 +306,7 @@ namespace dbms_mvc.Controllers
         }
 
         [HttpPost, ActionName("Export")]
+        [Authorize(Roles = "export, admin")]
         public IActionResult Export([FromBody] IList<Contact> contacts)
         {
             //TODO: Handle null properly
@@ -309,6 +349,50 @@ namespace dbms_mvc.Controllers
             string dateString =
               $"{date.Day}-{date.Month}-{date.Year}_contacts.xlsx";
             return dateString;
+        }
+
+        private List<Contact> PaginateContacts(IEnumerable<Contact> contacts, int? pageInput)
+        {
+            int page;
+            if (pageInput == null)
+            {
+                page = 1;
+            }
+            else
+            {
+                page = (int)pageInput;
+            }
+
+            ViewBag.page = page;
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            int maxPage = (contacts.Count() / maxPerPage) + 1;
+            if (page > maxPage)
+            {
+                page = maxPage;
+            }
+
+            ViewBag.prevDisabled = "";
+            ViewBag.nextDisabled = "";
+
+            if (page == 1)
+            {
+                ViewBag.prevDisabled = "disabled";
+            }
+
+            if (page == maxPage)
+            {
+                ViewBag.nextDisabled = "disabled";
+            }
+
+            int startingContact = (page - 1) * maxPerPage;
+            int finalContact = startingContact + maxPerPage;
+
+            return contacts.Skip(startingContact).Take(maxPerPage).ToList();
         }
     }
 }

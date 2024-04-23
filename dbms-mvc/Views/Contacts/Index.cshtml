@@ -1,6 +1,6 @@
 @model IEnumerable<Contact>
 @using dbms_mvc.Models
-
+ 
     @{
     	var props = typeof(Contact).GetProperties().ToList();
     	props = props.Where(p => p.Name != "ContactId").ToList();
