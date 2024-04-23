@@ -31,23 +31,42 @@ public class SpreadsheetService : ISpreadsheetService
 
     public IXLWorksheet GetWorksheetFromFile(IFormFile file)
     {
-        var stream = file.OpenReadStream();
-
-        if (file.ContentType == SpreadsheetService.xlsxContentType)
+        using (var stream = file.OpenReadStream())
         {
-            var workbook = new XLWorkbook(stream);
-            return workbook.Worksheet(SpreadsheetService.WorksheetName);
-        }
 
-        if (file.ContentType == SpreadsheetService.csvContentType)
-        {
-            //TODO: implement csv support
+            if (file.ContentType == SpreadsheetService.xlsxContentType)
+            {
+                var workbook = new XLWorkbook(stream);
+                return workbook.Worksheet(SpreadsheetService.WorksheetName);
+            }
+
+            if (file.ContentType == SpreadsheetService.csvContentType)
+            {
+                //TODO: implement csv support
+                var workbook = new XLWorkbook();
+                var worksheet = workbook.AddWorksheet(SpreadsheetService.WorksheetName);
+                using (var reader = new StreamReader(stream))
+                {
+                    var rows = reader.ReadToEnd().Split("\n");
+
+                    List<List<string>> cells = new List<List<string>>();
+                    foreach (var row in rows)
+                    {
+                        cells.Add(row.Split(",").ToList());
+                    }
+
+                    worksheet.Cell(1, 1).InsertTable(cells);
+                    worksheet.Table(0).LastRow().Delete();
+                    worksheet.Row(1).Delete();
+                    worksheet.Rows().AdjustToContents();
+                    workbook.SaveAs("workbook.xlsx");
+
+                }
+                return worksheet;
+            }
+
             throw new NotImplementedException();
-            //var reader = ExcelReaderFactory.CreateCsvReader(stream);
-            //return GetWorkbookFromCsv(reader, stream);
         }
-
-        throw new NotImplementedException();
     }
 
     public MappingPromptViewModel GetUnmappedColumnNames(IXLWorksheet worksheet)
@@ -101,7 +120,6 @@ public class SpreadsheetService : ISpreadsheetService
             {
                 string mapping = mappings[cellVal];
                 cell.SetValue(mapping);
-                _logger.LogInformation($"Changed worksheet column cell from: {cellVal} to: {mapping}");
             }
         }
         return worksheet;
