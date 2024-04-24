@@ -2,6 +2,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using AutoFixture;
 using dbms_mvc.Controllers;
 using dbms_mvc.Models;
@@ -16,6 +17,7 @@ public class ContactsControllerTests
     private readonly Fixture _fixture;
     private readonly IContactsRepository _repository;
     private readonly ISpreadsheetService _service;
+    private readonly IMemoryCache _cache;
 
     public ContactsControllerTests()
     {
@@ -28,6 +30,8 @@ public class ContactsControllerTests
         _fixture = new Fixture();
         _repository = new ContactsRepository(contact);
         _service = new SpreadsheetService(null);
+        var cacheOptions = new MemoryCacheOptions();
+        _cache = new MemoryCache(cacheOptions);
     }
 
     [TestMethod]
@@ -160,7 +164,7 @@ public class ContactsControllerTests
 
     private void CreateControllerAndContact(out ContactsController controller, out Contact contact)
     {
-        controller = new ContactsController(_repository, _service, null);
+        controller = new ContactsController(_repository, _service, _cache, null);
         contact = _fixture.Create<Contact>();
     }
 }
