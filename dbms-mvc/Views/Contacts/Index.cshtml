@@ -10,14 +10,13 @@
     }
 
     <style>
-        .search-box {
-            margin-bottom: 20px;
-        }
-
         .table th,
         .table td {
             vertical-align: middle;
         }
+	.clear-search-btn {
+	    margin-left: 0.4em;
+	}
     </style>
 
     <h1>Contacts List</h1>
@@ -38,6 +37,7 @@
 			</td>
 		    }
 		</form>
+		<a href="/Contacts" class="btn btn-warning clear-search-btn">Clear Search</a>
 	    </tr>
             <tr>
                 <th>@Html.DisplayNameFor(model => model.FirstName)</th>
