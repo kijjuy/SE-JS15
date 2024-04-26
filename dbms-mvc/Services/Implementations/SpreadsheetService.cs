@@ -1,6 +1,5 @@
 using System.Reflection;
 using ClosedXML.Excel;
-using ExcelDataReader;
 using dbms_mvc.Models;
 
 namespace dbms_mvc.Services;
