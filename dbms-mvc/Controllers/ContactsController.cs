@@ -39,6 +39,8 @@ namespace dbms_mvc.Controllers
 
             SetSearchViewData(searchContact);
 
+            ViewBag.searchContact = searchContact;
+
             return View(paginatedContacts);
         }
 
@@ -307,13 +309,9 @@ namespace dbms_mvc.Controllers
 
         [HttpPost, ActionName("Export")]
         [Authorize(Roles = "export, admin")]
-        public IActionResult Export([FromBody] IList<Contact> contacts)
+        public async Task<IActionResult> Export([FromBody] Contact searchContact)
         {
-            //TODO: Handle null properly
-            if (contacts == null)
-            {
-                Console.WriteLine("---- Contacts is null. ----");
-            }
+            var contacts = await _repository.SearchContacts(searchContact);
 
             byte[] spreadsheetByteArr = _spreadsheetService.CreateFileFromContacts(contacts);
 
@@ -338,7 +336,6 @@ namespace dbms_mvc.Controllers
                     ViewData["prop-" + prop.Name] = "";
                     continue;
                 }
-                Console.WriteLine($"Adding prop value with value={propValue}");
                 ViewData["prop-" + prop.Name] = propValue.ToString();
             }
         }
