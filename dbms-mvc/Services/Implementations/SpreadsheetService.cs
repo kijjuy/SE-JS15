@@ -37,7 +37,7 @@ public class SpreadsheetService : ISpreadsheetService
             if (file.ContentType == SpreadsheetService.xlsxContentType)
             {
                 var workbook = new XLWorkbook(stream);
-                return workbook.Worksheet(SpreadsheetService.WorksheetName);
+                return workbook.Worksheets.FirstOrDefault();
             }
 
             if (file.ContentType == SpreadsheetService.csvContentType)
@@ -59,8 +59,6 @@ public class SpreadsheetService : ISpreadsheetService
                     worksheet.Table(0).LastRow().Delete();
                     worksheet.Row(1).Delete();
                     worksheet.Rows().AdjustToContents();
-                    workbook.SaveAs("workbook.xlsx");
-
                 }
                 return worksheet;
             }
