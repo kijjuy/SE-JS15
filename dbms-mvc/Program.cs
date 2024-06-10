@@ -13,50 +13,30 @@ public class Program
 {
     private static void ConfigureRelease(ref WebApplicationBuilder builder)
     {
-        SecretClientOptions kvOptions = new SecretClientOptions()
-        {
-            Retry =
-        {
-        Delay = TimeSpan.FromSeconds(2),
-        MaxDelay = TimeSpan.FromSeconds(16),
-        MaxRetries = 5,
-        Mode = Azure.Core.RetryMode.Exponential
-        }
-        };
-        string kvUri = "https://sm-app-secrets.vault.azure.net";
-
-        var secretClient = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(), kvOptions);
-
-        var conStringSecret = secretClient.GetSecret("db-con-string");
-        var connectionString = conStringSecret.Value.Value;
+        Console.WriteLine("Launching in configuration: Release");
+        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
-
-        var appInsightsConString = secretClient.GetSecret("app-insights-con-string").Value;
-
-        builder.Logging.AddApplicationInsights(
-            configureTelemetryConfiguration: (config) =>
-                config.ConnectionString = appInsightsConString.Value,
-                configureApplicationInsightsLoggerOptions: (options) => { }
-        );
     }
 
     private static void ConfigureDevelopment(ref WebApplicationBuilder builder)
     {
+        Console.WriteLine("Launching in configuration: Debug");
         var connectionStringSecret = builder.Configuration.GetSection("ConnectionStrings").Get<ConnectionStringConfig>();
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionStringSecret.Docker));
     }
 
+
     public static void Main(string[] args)
     {
 
         var builder = WebApplication.CreateBuilder(args);
         var configurationManager = builder.Configuration;
-
         // Add services to the container.
+
         if (builder.Environment.IsProduction())
         {
             ConfigureRelease(ref builder);
@@ -87,26 +67,24 @@ public class Program
         var app = builder.Build();
 
         //setup DbInitializer
-        //var adminPassSecret = vaultClient.GetSecret("AdminPassword").Value;
+        //var adminPassSecret = Environment.GetEnvironmentVariable("AdminPassword");
         //var loginSecrets = new LoginConfig
         //{
-        //    AdminPassword = adminPassSecret.Value
+        //    AdminPassword = adminPassSecret
         //};
 
-        var loginSecrets = configurationManager.GetSection("Login").Get<LoginConfig>();
-
-        using (var scope = app.Services.CreateScope())
-        {
-            if (loginSecrets == null)
-            {
-                Console.WriteLine("AppSecrets must be set up for database seeding.");
-            }
-            else
-            {
-                DbInitializer.appSecrets = loginSecrets;
-                DbInitializer.SeedUsersAndRoles(scope.ServiceProvider).Wait();
-            }
-        }
+        //using (var scope = app.Services.CreateScope())
+        //{
+        //    if (loginSecrets == null)
+        //    {
+        //        Console.WriteLine("AppSecrets must be set up for database seeding.");
+        //    }
+        //    else
+        //    {
+        //        DbInitializer.appSecrets = loginSecrets;
+        //        DbInitializer.SeedUsersAndRoles(scope.ServiceProvider).Wait();
+        //    }
+        //}
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
