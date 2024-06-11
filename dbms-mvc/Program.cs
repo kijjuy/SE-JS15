@@ -62,6 +62,9 @@ public class Program
 
         builder.Services.AddMemoryCache();
 
+        builder.Services.AddLogging(builder => builder.AddSimpleConsole(opts => opts.TimestampFormat = "[HH:mm:ss]"));
+
+
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
         var app = builder.Build();
